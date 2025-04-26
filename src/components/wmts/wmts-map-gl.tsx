@@ -1,8 +1,17 @@
-import React, { useRef, useEffect, useState } from 'react';
-import maplibregl from 'maplibre-gl';
-import 'maplibre-gl/dist/maplibre-gl.css';
-import { Loader, InputBase, Combobox, useCombobox, CheckIcon, Group, ActionIcon } from '@mantine/core';
-import { IconRefresh } from '@tabler/icons-react';
+import React, { useEffect, useRef, useState } from 'react'
+import maplibregl from 'maplibre-gl'
+import 'maplibre-gl/dist/maplibre-gl.css'
+import {
+  ActionIcon,
+  CheckIcon,
+  Combobox,
+  Group,
+  InputBase,
+  Loader,
+  useCombobox
+} from '@mantine/core'
+import { IconRefresh } from '@tabler/icons-react'
+import { WMTSLayer } from '../../types/wmts.ts'
 
 interface WMTSMapGLProps {
   width?: string;
@@ -10,14 +19,6 @@ interface WMTSMapGLProps {
   center?: [number, number];
   zoom?: number;
   selectedLayer?: string;
-}
-
-interface WMTSLayer {
-  title: string;
-  identifier: string;
-  format: string;
-  tileMatrixSet: string;
-  style?: string;
 }
 
 const WMTSMapGL: React.FC<WMTSMapGLProps> = ({
