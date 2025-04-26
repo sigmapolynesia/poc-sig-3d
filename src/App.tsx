@@ -48,17 +48,13 @@ function App() {
           />
         </AppShell.Navbar>
         <AppShell.Main>
-          <div className="App">
-            <main>
-              {currentView === 'wmts' ? (
-                <WMTSView />
-              ) : (
-                <Globe 
-                  height="1000px"
-                />
-              )}
-            </main>
-          </div>
+          {currentView === 'wmts' ? (
+            <WMTSView />
+          ) : (
+            <Globe 
+              height="1000px"
+            />
+          )}
         </AppShell.Main>
       </AppShell>
     </MantineProvider>

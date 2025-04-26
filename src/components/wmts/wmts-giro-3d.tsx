@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react'
 import { MapControls } from "three/examples/jsm/controls/MapControls.js";
 import Extent from "@giro3d/giro3d/core/geographic/Extent.js";
 import Instance from "@giro3d/giro3d/core/Instance.js";
@@ -23,14 +23,7 @@ const WMTSGiro3D: React.FC = () => {
   
   useEffect(() => { 
     if (!mapContainer.current) return;
-     
-    while (mapContainer.current.firstChild) {
-      mapContainer.current.removeChild(mapContainer.current.firstChild);
-    }
 
-    let instance: any = null;
-    let controls: any = null;
-    
     const tahitiLon = -149.43;
     const tahitiLat = -17.67; 
 
@@ -45,7 +38,7 @@ const WMTSGiro3D: React.FC = () => {
       20037508.342789244,
     );
 
-    instance = new Instance({
+    let instance = new Instance({
       target: mapContainer.current,
       crs: extent.crs,
       backgroundColor: 0x0a3b59,
@@ -64,7 +57,7 @@ const WMTSGiro3D: React.FC = () => {
     const map = new Map({ extent });
     instance.add(map);
 
-    controls = new MapControls(instance.view.camera, instance.domElement);
+    let controls  = new MapControls(instance.view.camera, instance.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
     controls.screenSpacePanning = true;
@@ -110,18 +103,18 @@ const WMTSGiro3D: React.FC = () => {
       .catch((e) => console.error("Error loading WMTS capabilities:", e));
      
     
+    return () => {
+      // Libère les ressources lorsque le composant est démonté.
+      instance.dispose()
+    }
   }, []);
   
   return (
     <div 
       ref={mapContainer} 
       style={{ 
-        marginTop: '250px',
         width: '100%', 
         height: '1100px', 
-        position: 'absolute',
-        top: 0,
-        left: 0
       }} 
     />
   );
