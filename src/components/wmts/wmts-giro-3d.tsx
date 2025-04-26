@@ -5,6 +5,7 @@ import Instance from "@giro3d/giro3d/core/Instance.js";
 import ColorLayer from "@giro3d/giro3d/core/layer/ColorLayer.js";
 import Map from "@giro3d/giro3d/entities/Map.js";
 import WmtsSource from "@giro3d/giro3d/sources/WmtsSource.js";
+import MapContainer from '../MapContainer.tsx'
 
 
 const originalConsoleError = console.error;
@@ -110,13 +111,7 @@ const WMTSGiro3D: React.FC = () => {
   }, []);
   
   return (
-    <div 
-      ref={mapContainer} 
-      style={{ 
-        width: '100%', 
-        height: '1100px', 
-      }} 
-    />
+    <MapContainer ref={mapContainer} />
   );
 };
 
