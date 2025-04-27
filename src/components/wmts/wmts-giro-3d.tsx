@@ -7,7 +7,7 @@ import Map from "@giro3d/giro3d/entities/Map.js";
 import WmtsSource from "@giro3d/giro3d/sources/WmtsSource.js";
 import MapContainer from '../MapContainer.tsx'
 
-
+// Gestion des erreurs de transformBufferInPlace
 const originalConsoleError = console.error;
 console.error = function(...args) {
   if (args[0] && 
@@ -25,12 +25,7 @@ const WMTSGiro3D: React.FC = () => {
   useEffect(() => { 
     if (!mapContainer.current) return;
 
-    const tahitiLon = -149.43;
-    const tahitiLat = -17.67; 
-
-    const lonMercator = tahitiLon * 20037508.34 / 180;
-    const latMercator = Math.log(Math.tan((90 + tahitiLat) * Math.PI / 360)) / (Math.PI / 180) * 20037508.34 / 180;
-     
+    // 1. Initialisation de la carte
     const extent = new Extent(
       "EPSG:3857",
       -20037508.342789244,
@@ -58,7 +53,7 @@ const WMTSGiro3D: React.FC = () => {
     const map = new Map({ extent });
     instance.add(map);
 
-    let controls  = new MapControls(instance.view.camera, instance.domElement);
+    let controls = new MapControls(instance.view.camera, instance.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
     controls.screenSpacePanning = true;
@@ -66,17 +61,7 @@ const WMTSGiro3D: React.FC = () => {
      
     instance.view.setControls(controls);
     
-    const centerOnTahiti = () => {
-      const zoomLevel = 200000;
-      
-      instance.view.camera.position.set(lonMercator, latMercator, zoomLevel);
-      
-      controls.target.set(lonMercator, latMercator, 0);
-      controls.update();
-      
-      instance.notifyChange(instance.view);
-    };
-     
+    // 2. Chargement des capabilities/couches
     WmtsSource.fromCapabilities(
       "https://www.tefenua.gov.pf/api/wmts?request=GetCapabilities",
       {
@@ -102,12 +87,30 @@ const WMTSGiro3D: React.FC = () => {
         }
       })
       .catch((e) => console.error("Error loading WMTS capabilities:", e));
-     
+
+    // 3. Zoom sur la vue par défaut
+    const centerOnTahiti = () => {
+      const tahitiLon = -149.43;
+      const tahitiLat = -17.67; 
+
+      const lonMercator = tahitiLon * 20037508.34 / 180;
+      const latMercator = Math.log(Math.tan((90 + tahitiLat) * Math.PI / 360)) / (Math.PI / 180) * 20037508.34 / 180;
+      
+      const zoomLevel = 200000;
+      
+      instance.view.camera.position.set(lonMercator, latMercator, zoomLevel);
+      
+      controls.target.set(lonMercator, latMercator, 0);
+      controls.update();
+      
+      instance.notifyChange(instance.view);
+    };
     
     return () => {
       // Libère les ressources lorsque le composant est démonté.
       instance.dispose()
     }
+
   }, []);
   
   return (

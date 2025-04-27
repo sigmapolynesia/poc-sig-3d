@@ -1,63 +1,41 @@
 import { useEffect, useRef, useState } from "react";
 import * as Cesium from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
-import { InputBase, Combobox, useCombobox, CheckIcon, Group, ActionIcon } from '@mantine/core';
-import { IconRefresh } from '@tabler/icons-react';
+import MapContainer from '../MapContainer';
+import WMTSLayerSelector from './wmts-layer-selector';
+import { WMTSLayer } from '../../types/wmts';
 
-const WMTSCesiumJS = () => {
-  const cesiumContainer = useRef<HTMLDivElement>(null);
+interface WMTSCesiumJSProps {
+  selectedLayer?: string;
+}
+
+const WMTSCesiumJS: React.FC<WMTSCesiumJSProps> = ({
+  selectedLayer = "TEFENUA:FOND"
+}) => {
+  const mapContainer = useRef<HTMLDivElement>(null);
   const [viewer, setViewer] = useState<Cesium.Viewer | null>(null);
-  const [selectedLayer, setSelectedLayer] = useState<string>("TEFENUA:FOND");
+  const [currentLayer, setCurrentLayer] = useState<string>(selectedLayer);
   
-  const combobox = useCombobox({
-    onDropdownClose: () => combobox.resetSelectedOption(),
-    onDropdownOpen: (eventSource) => {
-      if (eventSource === 'keyboard') {
-        combobox.selectActiveOption();
-      } else {
-        combobox.updateSelectedOptionIndex('active');
-      }
+  const layers: WMTSLayer[] = [
+    { 
+      identifier: "TEFENUA:FOND", 
+      title: "FOND Tefenua",
+      format: "image/jpeg",
+      tileMatrixSet: "EPSG:4326"
     },
-  });
-  
-  const layers = [
-    { identifier: "TEFENUA:FOND", title: "FOND Tefenua" },
-    { identifier: "TEFENUA:FOND_LEGER_v1", title: "Fond Léger" },
+    { 
+      identifier: "TEFENUA:FOND_LEGER_v1", 
+      title: "Fond Léger",
+      format: "image/png8",
+      tileMatrixSet: "EPSG:4326"
+    },
   ];
 
-  const getLayerTitleById = (id: string) => {
-    const layer = layers.find((l) => l.identifier === id);
-    return layer ? layer.title : id;
-  };
-
-  const reloadCurrentLayer = () => {
-    if (viewer) {
-      viewer.imageryLayers.removeAll();
-      loadWMTSLayer(selectedLayer);
-    }
-  };
-
-  const loadWMTSLayer = (layerId: string) => {
-    if (!viewer) return;
-    
-    const wmtsProvider = new Cesium.WebMapTileServiceImageryProvider({
-      url: "https://green.tefenua.gov.pf:443/api/wmts",
-      layer: layerId,
-      style: "default",
-      format: layerId === "TEFENUA:FOND" ? "image/jpeg" : "image/png8",
-      tileMatrixSetID: "EPSG:4326",
-      tileMatrixLabels: ["00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"],
-      maximumLevel: 19,
-      credit: new Cesium.Credit("© Tefenua - Gouvernement de la Polynésie française")
-    });
-
-    viewer.imageryLayers.addImageryProvider(wmtsProvider);
-  };
-
+  // 1. Initialisation de la carte
   useEffect(() => {
-    if (!cesiumContainer.current) return;
+    if (!mapContainer.current) return;
     
-    const viewer = new Cesium.Viewer(cesiumContainer.current, {
+    const viewer = new Cesium.Viewer(mapContainer.current, {
       baseLayerPicker: false,
       geocoder: false,
       homeButton: false,
@@ -70,9 +48,41 @@ const WMTSCesiumJS = () => {
     });
 
     viewer.imageryLayers.removeAll();
-
     setViewer(viewer);
 
+    return () => {
+      viewer.destroy();
+    };
+  }, []);
+
+  // 2. Chargement des capabilities/couches
+  const loadWMTSLayer = (layerId: string) => {
+    if (!viewer) return;
+    
+    const layer = layers.find((l) => l.identifier === layerId);
+    if (!layer) return;
+    
+    const wmtsProvider = new Cesium.WebMapTileServiceImageryProvider({
+      url: "https://www.tefenua.gov.pf/api/wmts",
+      layer: layer.identifier,
+      style: layer.style || "default",
+      format: layer.format,
+      tileMatrixSetID: layer.tileMatrixSet,
+      tileMatrixLabels: ["00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"],
+      maximumLevel: 19,
+      credit: new Cesium.Credit("© Tefenua - Polynésie française")
+    });
+
+    viewer.imageryLayers.addImageryProvider(wmtsProvider);
+  };
+
+  useEffect(() => {
+    if (!viewer) return;
+
+    viewer.imageryLayers.removeAll();
+    loadWMTSLayer(currentLayer);
+    
+    // 3. Zoom sur la vue par défaut
     viewer.camera.flyTo({
       destination: Cesium.Cartesian3.fromDegrees(-119, -33.2, 500000),
       orientation: {
@@ -81,77 +91,30 @@ const WMTSCesiumJS = () => {
         roll: 0.0
       }
     });
+  }, [viewer, currentLayer]);
 
-    return () => {
-      viewer.destroy();
-    };
-  }, []);
+  const reloadCurrentLayer = () => {
+    if (viewer) {
+      viewer.imageryLayers.removeAll();
+      loadWMTSLayer(currentLayer);
+    }
+  };
 
-  useEffect(() => {
-    if (!viewer) return;
-
-    viewer.imageryLayers.removeAll();
-    loadWMTSLayer(selectedLayer);
-  }, [viewer, selectedLayer]);
+  const handleLayerChange = (layerId: string) => {
+    setCurrentLayer(layerId);
+  };
 
   return (
-    <div style={{ width: '100%', height: 'auto', display: 'flex', flexDirection: 'column' }}>
+    <div>
       <div style={{ marginBottom: '10px' }}>
-        <Group>
-          <Combobox
-            store={combobox}
-            resetSelectionOnOptionHover
-            onOptionSubmit={(val) => {
-              const selectedLayerObj = layers.find(l => l.title === val);
-              if (selectedLayerObj) {
-                setSelectedLayer(selectedLayerObj.identifier);
-              }
-              combobox.updateSelectedOptionIndex('active');
-              combobox.closeDropdown();
-            }}
-          >
-            <Combobox.Target targetType="button">
-              <InputBase
-                mt={20}
-                mb={10}
-                maw={200}
-                component="button"
-                type="button"
-                pointer
-                rightSection={<Combobox.Chevron />}
-                rightSectionPointerEvents="none"
-                onClick={() => combobox.toggleDropdown()}
-                style={{ minWidth: '250px' }}
-              >
-                {getLayerTitleById(selectedLayer)}
-              </InputBase>
-            </Combobox.Target>
-
-            <Combobox.Dropdown>
-              <Combobox.Options>
-                <Combobox.Group label="Te Fenua">
-                  {layers.map((layer) => (
-                    <Combobox.Option 
-                      value={layer.title} 
-                      key={layer.identifier}
-                      active={layer.identifier === selectedLayer}
-                    >
-                      <Group gap="xs">
-                        {layer.identifier === selectedLayer && <CheckIcon size={12} />}
-                        <span>{layer.title}</span>
-                      </Group>
-                    </Combobox.Option>
-                  ))}
-                </Combobox.Group>
-              </Combobox.Options>
-            </Combobox.Dropdown>
-          </Combobox>
-          <ActionIcon mt={10} variant="subtle" color="rgba(0, 0, 0, 1)" onClick={reloadCurrentLayer}>
-            <IconRefresh style={{ width: '70%', height: '70%' }} stroke={1.5} />
-          </ActionIcon>
-        </Group>
+        <WMTSLayerSelector 
+          layers={layers}
+          currentLayer={currentLayer}
+          onLayerChange={handleLayerChange}
+          onRefresh={reloadCurrentLayer}
+        />
       </div>
-      <div ref={cesiumContainer} style={{ width: '100%', height: '950px', borderRadius: '4px' }} />
+      <MapContainer ref={mapContainer} />
     </div>
   );
 };

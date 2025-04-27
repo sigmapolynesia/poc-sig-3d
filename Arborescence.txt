@@ -1,4 +1,4 @@
-SPLab
+POC-SIG-3D
  ┣ node_modules
  ┣ public
  ┃ ┗ vite.svg
@@ -12,8 +12,11 @@ SPLab
 	┃ ┃ ┣ wmts-giro-3d.tsx
 	┃ ┃ ┗ wmts-map-gl.tsx
 	┃ ┗ Globe.tsx
+	┃ ┗ MapContainer.tsx
 	┣ views
 	┃ ┗ wmts.tsx
+	┣ types
+	┃ ┗ wmts.ts
 	┣ App.css
 	┣ App.tsx
 	┣ index.css

@@ -5,3 +5,4 @@ export interface WMTSLayer {
   tileMatrixSet: string;
   style?: string;
 }
+

@@ -10,7 +10,7 @@ const WMTSView = () => {
   return (
     <div className="wmts-container">
       <Title order={1} ta="left" mb={20}>WMTS</Title>
-      <Text ta="left" mb={20}>Visualisation du WMTS de TeFenua dans les différentes solution 3D Web choisis.</Text>
+      <Text ta="left" mb={20}>Visualisation du WMTS de TeFenua dans les différentes solutions 3D Web choisies.</Text>
       
       <Tabs keepMounted={false} value={activeTab} onChange={(value) => setActiveTab(value || 'maplibre')}>
         <Tabs.List>
