@@ -4,6 +4,11 @@ import WMTSGiro3D from '../components/wmts/wmts-giro-3d';
 import WMTSCesiumJS from '../components/wmts/wmts-cesium-js';
 import { Tabs, Title, Text } from '@mantine/core';
 
+// Importation des logos SVG
+import MapLibreLogo from '../assets/maplibre.png';
+import Giro3DLogo from '../assets/giro3d.png';
+import CesiumLogo from '../assets/cesium.png';
+
 const WMTSView = () => {
   const [activeTab, setActiveTab] = useState('maplibre');
 
@@ -14,9 +19,15 @@ const WMTSView = () => {
       
       <Tabs keepMounted={false} value={activeTab} onChange={(value) => setActiveTab(value || 'maplibre')}>
         <Tabs.List>
-          <Tabs.Tab value="maplibre">MapLibre</Tabs.Tab>
-          <Tabs.Tab value="giro3d">Giro 3D</Tabs.Tab>
-          <Tabs.Tab value="cesium">Cesium</Tabs.Tab>
+          <Tabs.Tab value="maplibre">
+            <img src={MapLibreLogo} alt="MapLibre" style={{ height: '20px' }} />
+          </Tabs.Tab>
+          <Tabs.Tab value="giro3d">
+            <img src={Giro3DLogo} alt="Giro 3D" style={{ height: '16px' }} />
+          </Tabs.Tab>
+          <Tabs.Tab value="cesium">
+            <img src={CesiumLogo} alt="Cesium" style={{ height: '20px' }} />
+          </Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="maplibre">

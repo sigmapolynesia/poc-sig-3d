@@ -14,8 +14,8 @@ interface WMTSMapGLProps {
 
 const WMTSMapGL: React.FC<WMTSMapGLProps> = ({
   center = [-149.57, -17.67],
-  zoom = 9,
-  selectedLayer = 'TEFENUA:FOND_LEGER_v1'
+  zoom = 8.5,
+  selectedLayer = 'TEFENUA:FOND'
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
