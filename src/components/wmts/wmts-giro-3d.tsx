@@ -114,7 +114,7 @@ const WMTSGiro3D: React.FC = () => {
   }, []);
   
   return (
-    <MapContainer ref={mapContainer} />
+    <MapContainer ref={mapContainer} style={{ marginTop: '76px' }} />
   );
 };
 

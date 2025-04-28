@@ -8,7 +8,7 @@ export type MapContainerProps = BoxProps & PropsWithChildren<{
 const MapContainer: FC<MapContainerProps> = (props) => {
   return (
     <Box
-      bg="gray.1"
+      bg="rgba(217, 241, 255, 0.5)"
       w="100%"
       h="60dvh"
       flex={1}

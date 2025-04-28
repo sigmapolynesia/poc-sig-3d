@@ -4,7 +4,7 @@ import MapContainer from '../MapContainer';
 
 // Note: Cette implémentation est un exemple simplifié.
 
-const GeojsonCesiumJS = () => {
+const ReliefCesiumJS = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -25,4 +25,4 @@ const GeojsonCesiumJS = () => {
   return <MapContainer ref={mapContainer} style={{ marginTop: '20px' }} />;
 };
 
-export default GeojsonCesiumJS;
+export default ReliefCesiumJS;
