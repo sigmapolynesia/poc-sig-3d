@@ -14,8 +14,8 @@ const GeojsonView = () => {
 
   return (
     <div className="geojson-container">
-      <Title order={1} ta="left" mb={20}>geojson</Title>
-      <Text ta="left" mb={20}>Visualisation du geojson de TeFenua dans les différentes solutions 3D Web choisies.</Text>
+      <Title order={1} ta="left" mb={20}>GeoJSON</Title>
+      <Text ta="left" mb={20}>Visualisation de données GeoJSON dans les différentes solutions 3D Web choisies.</Text>
       
       <Tabs keepMounted={false} value={activeTab} onChange={(value) => setActiveTab(value || 'maplibre')}>
         <Tabs.List>

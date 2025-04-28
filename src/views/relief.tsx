@@ -15,7 +15,7 @@ const ReliefView = () => {
   return (
     <div className="relief-container">
       <Title order={1} ta="left" mb={20}>Relief</Title>
-      <Text ta="left" mb={20}>Visualisation du Relief de TeFenua dans les différentes solutions 3D Web choisies.</Text>
+      <Text ta="left" mb={20}>Visualisation de relief (MNT) dans les différentes solutions 3D Web choisies.</Text>
       
       <Tabs keepMounted={false} value={activeTab} onChange={(value) => setActiveTab(value || 'maplibre')}>
         <Tabs.List>

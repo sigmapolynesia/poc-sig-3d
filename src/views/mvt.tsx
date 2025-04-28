@@ -14,8 +14,8 @@ const MVTView = () => {
 
   return (
     <div className="mvt-container">
-      <Title order={1} ta="left" mb={20}>mvt</Title>
-      <Text ta="left" mb={20}>Visualisation du mvt de TeFenua dans les différentes solutions 3D Web choisies.</Text>
+      <Title order={1} ta="left" mb={20}>MVT</Title>
+      <Text ta="left" mb={20}>Visualisation de MVT dans les différentes solutions 3D Web choisies.</Text>
       
       <Tabs keepMounted={false} value={activeTab} onChange={(value) => setActiveTab(value || 'maplibre')}>
         <Tabs.List>

@@ -14,8 +14,8 @@ const DtilesView = () => {
 
   return (
     <div className="3d-tiles-container">
-      <Title order={1} ta="left" mb={20}>3d-tiles</Title>
-      <Text ta="left" mb={20}>Visualisation du 3d-tiles de TeFenua dans les différentes solutions 3D Web choisies.</Text>
+      <Title order={1} ta="left" mb={20}>3D Tiles</Title>
+      <Text ta="left" mb={20}>Visualisation de 3D Tiles dans les différentes solutions 3D Web choisies.</Text>
       
       <Tabs keepMounted={false} value={activeTab} onChange={(value) => setActiveTab(value || 'maplibre')}>
         <Tabs.List>

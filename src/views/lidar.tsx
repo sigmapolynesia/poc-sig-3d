@@ -14,8 +14,8 @@ const LidarView = () => {
 
   return (
     <div className="lidar-container">
-      <Title order={1} ta="left" mb={20}>lidar</Title>
-      <Text ta="left" mb={20}>Visualisation du lidar de TeFenua dans les différentes solutions 3D Web choisies.</Text>
+      <Title order={1} ta="left" mb={20}>LIDAR</Title>
+      <Text ta="left" mb={20}>Visualisation d'images LIDAR dans les différentes solutions 3D Web choisies.</Text>
       
       <Tabs keepMounted={false} value={activeTab} onChange={(value) => setActiveTab(value || 'maplibre')}>
         <Tabs.List>
