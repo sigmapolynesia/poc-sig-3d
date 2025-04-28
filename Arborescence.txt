@@ -11,10 +11,35 @@ POC-SIG-3D
 	┃ ┃ ┣ wmts-cesium-js.tsx
 	┃ ┃ ┣ wmts-giro-3d.tsx
 	┃ ┃ ┗ wmts-map-gl.tsx
+	┃ ┣ relief
+	┃ ┃ ┣ relief-cesium-js.tsx
+	┃ ┃ ┣ relief-giro-3d.tsx
+	┃ ┃ ┗ relief-map-gl.tsx
+	┃ ┣ geojson
+	┃ ┃ ┣ geojson-cesium-js.tsx
+	┃ ┃ ┣ geojson-giro-3d.tsx
+	┃ ┃ ┗ geojson-map-gl.tsx
+	┃ ┣ mvt
+	┃ ┃ ┣ mvt-cesium-js.tsx
+	┃ ┃ ┣ mvt-giro-3d.tsx
+	┃ ┃ ┗ mvt-map-gl.tsx
+	┃ ┣ lidar
+	┃ ┃ ┣ lidar-cesium-js.tsx
+	┃ ┃ ┣ lidar-giro-3d.tsx
+	┃ ┃ ┗ lidar-map-gl.tsx
+	┃ ┣ 3d-tiles
+	┃ ┃ ┣ 3d-tiles-cesium-js.tsx
+	┃ ┃ ┣ 3d-tiles-giro-3d.tsx
+	┃ ┃ ┗ 3d-tiles-map-gl.tsx
 	┃ ┗ Globe.tsx
 	┃ ┗ MapContainer.tsx
 	┣ views
 	┃ ┗ wmts.tsx
+	┃ ┗ relief.tsx
+	┃ ┗ geojson.tsx
+	┃ ┗ mvt.tsx
+	┃ ┗ lidar.tsx
+	┃ ┗ 3d-tiles.tsx
 	┣ types
 	┃ ┗ wmts.ts
 	┣ App.css
