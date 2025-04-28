@@ -56,7 +56,7 @@ const WMTSCesiumJS: React.FC<WMTSCesiumJSProps> = ({
   }, []);
 
   // 2. Chargement des capabilities/couches
-  const loadWMTSLayer = (layerId: string) => {
+  const loadCapabilities = (layerId: string) => {
     if (!viewer) return;
     
     const layer = layers.find((l) => l.identifier === layerId);
@@ -80,7 +80,7 @@ const WMTSCesiumJS: React.FC<WMTSCesiumJSProps> = ({
     if (!viewer) return;
 
     viewer.imageryLayers.removeAll();
-    loadWMTSLayer(currentLayer);
+    loadCapabilities(currentLayer);
     
     // 3. Zoom sur la vue par défaut
     viewer.camera.flyTo({
@@ -96,7 +96,7 @@ const WMTSCesiumJS: React.FC<WMTSCesiumJSProps> = ({
   const reloadCurrentLayer = () => {
     if (viewer) {
       viewer.imageryLayers.removeAll();
-      loadWMTSLayer(currentLayer);
+      loadCapabilities(currentLayer);
     }
   };
 
