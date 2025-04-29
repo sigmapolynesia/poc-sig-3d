@@ -8,13 +8,17 @@ interface WMTSLayerSelectorProps {
   currentLayer: string;
   onLayerChange: (layerId: string) => void;
   onRefresh: () => void;
+  title?: string;
+  loading?: boolean;
 }
 
 const WMTSLayerSelector: React.FC<WMTSLayerSelectorProps> = ({
   layers,
   currentLayer,
   onLayerChange,
-  onRefresh
+  onRefresh,
+  title = "Te Fenua",
+  loading = false
 }) => {
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
@@ -58,14 +62,15 @@ const WMTSLayerSelector: React.FC<WMTSLayerSelectorProps> = ({
             rightSectionPointerEvents="none"
             onClick={() => combobox.toggleDropdown()}
             style={{ minWidth: '250px' }}
+            disabled={loading || layers.length === 0}
           >
-            {getLayerTitleById(currentLayer)}
+            {loading ? 'Chargement...' : getLayerTitleById(currentLayer)}
           </InputBase>
         </Combobox.Target>
 
         <Combobox.Dropdown>
           <Combobox.Options>
-            <Combobox.Group label="Te Fenua">
+            <Combobox.Group label={title}>
               {layers.map((layer) => (
                 <Combobox.Option 
                   value={layer.title} 
@@ -82,7 +87,13 @@ const WMTSLayerSelector: React.FC<WMTSLayerSelectorProps> = ({
           </Combobox.Options>
         </Combobox.Dropdown>
       </Combobox>
-      <ActionIcon mt={10} variant="subtle" color="rgba(0, 0, 0, 1)" onClick={onRefresh}>
+      <ActionIcon 
+        mt={10} 
+        variant="subtle" 
+        color="rgba(0, 0, 0, 1)" 
+        onClick={onRefresh}
+        disabled={loading}
+      >
         <IconRefresh style={{ width: '70%', height: '70%' }} stroke={1.5} />
       </ActionIcon>
     </Group>

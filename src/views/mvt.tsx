@@ -4,7 +4,6 @@ import MVTGiro3D from '../components/mvt/mvt-giro-3d';
 import MVTCesiumJS from '../components/mvt/mvt-cesium-js';
 import { Tabs, Title, Text } from '@mantine/core';
 
-// Importation des logos SVG
 import MapLibreLogo from '../assets/maplibre.png';
 import Giro3DLogo from '../assets/giro3d.png';
 import CesiumLogo from '../assets/cesium.png';

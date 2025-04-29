@@ -4,7 +4,6 @@ import ReliefGiro3D from '../components/relief/relief-giro-3d';
 import ReliefCesiumJS from '../components/relief/relief-cesium-js';
 import { Tabs, Title, Text } from '@mantine/core';
 
-// Importation des logos SVG
 import MapLibreLogo from '../assets/maplibre.png';
 import Giro3DLogo from '../assets/giro3d.png';
 import CesiumLogo from '../assets/cesium.png';

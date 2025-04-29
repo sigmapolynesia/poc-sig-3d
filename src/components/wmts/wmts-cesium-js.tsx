@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as Cesium from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import MapContainer from '../MapContainer';
 import WMTSLayerSelector from './wmts-layer-selector';
 import { WMTSLayer } from '../../types/wmts';
+import { configureCesiumWMTS, cesiumCenter } from '../../utils/wmtsUtils';
 
 interface WMTSCesiumJSProps {
   selectedLayer?: string;
@@ -15,7 +16,11 @@ const WMTSCesiumJS: React.FC<WMTSCesiumJSProps> = ({
   const mapContainer = useRef<HTMLDivElement>(null);
   const [viewer, setViewer] = useState<Cesium.Viewer | null>(null);
   const [currentLayer, setCurrentLayer] = useState<string>(selectedLayer);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   
+  const WMTS_URL = "https://www.tefenua.gov.pf/api/wmts";
+  
+  // Définition des couches disponibles
   const layers: WMTSLayer[] = [
     { 
       identifier: "TEFENUA:FOND", 
@@ -55,64 +60,39 @@ const WMTSCesiumJS: React.FC<WMTSCesiumJSProps> = ({
     };
   }, []);
 
-  // 2. Chargement des capabilities/couches
-  const loadCapabilities = (layerId: string) => {
-    if (!viewer) return;
-    
-    const layer = layers.find((l) => l.identifier === layerId);
-    if (!layer) return;
-    
-    const wmtsProvider = new Cesium.WebMapTileServiceImageryProvider({
-      url: "https://www.tefenua.gov.pf/api/wmts",
-      layer: layer.identifier,
-      style: layer.style || "default",
-      format: layer.format,
-      tileMatrixSetID: layer.tileMatrixSet,
-      tileMatrixLabels: ["00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"],
-      maximumLevel: 19,
-      credit: new Cesium.Credit("© Tefenua - Polynésie française")
-    });
-
-    viewer.imageryLayers.addImageryProvider(wmtsProvider);
-  };
-
+  // 2. Chargement et mise à jour de la couche WMTS
   useEffect(() => {
     if (!viewer) return;
+    setIsLoading(true);
 
-    viewer.imageryLayers.removeAll();
-    loadCapabilities(currentLayer);
-    
-    // 3. Zoom sur la vue par défaut
-    viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(-119, -33.2, 500000),
-      orientation: {
-        heading: Cesium.Math.toRadians(0),
-        pitch: Cesium.Math.toRadians(-90),
-        roll: 0.0
-      }
-    });
+    try {
+      const layer = layers.find((l) => l.identifier === currentLayer);
+      if (!layer) return;
+      
+      configureCesiumWMTS(viewer, layer, WMTS_URL);
+      
+      // 3. Zoom sur la vue par défaut
+      cesiumCenter(viewer);
+    } catch (error) {
+      console.error("Erreur lors du chargement de la couche WMTS:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }, [viewer, currentLayer]);
 
   const reloadCurrentLayer = () => {
-    if (viewer) {
-      viewer.imageryLayers.removeAll();
-      loadCapabilities(currentLayer);
-    }
-  };
-
-  const handleLayerChange = (layerId: string) => {
-    setCurrentLayer(layerId);
+    if (!viewer) return;
+    
+    const layer = layers.find((l) => l.identifier === currentLayer);
+    if (!layer) return;
+    
+    configureCesiumWMTS(viewer, layer, WMTS_URL);
   };
 
   return (
     <div>
       <div style={{ marginBottom: '10px' }}>
-        <WMTSLayerSelector 
-          layers={layers}
-          currentLayer={currentLayer}
-          onLayerChange={handleLayerChange}
-          onRefresh={reloadCurrentLayer}
-        />
+      <WMTSLayerSelector layers={layers} currentLayer={currentLayer} onLayerChange={setCurrentLayer} onRefresh={reloadCurrentLayer} loading={isLoading} />
       </div>
       <MapContainer ref={mapContainer} />
     </div>
