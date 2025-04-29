@@ -31,11 +31,11 @@ export const posTahiti = {
 
 export const cesiumCenter = (
   viewer: Cesium.Viewer,
-  height: number = 500000
+  height: number = 250000
 ): void => {
   if (!viewer) return;
   
-  viewer.camera.flyTo({
+  viewer.camera.setView({
     destination: Cesium.Cartesian3.fromDegrees(posTahiti.cesiumlon, posTahiti.cesiumlat, height),
     orientation: {
       heading: Cesium.Math.toRadians(0),
