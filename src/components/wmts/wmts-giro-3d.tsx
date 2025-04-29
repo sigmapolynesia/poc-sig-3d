@@ -96,7 +96,7 @@ const WMTSGiro3D: React.FC = () => {
       const lonMercator = tahitiLon * 20037508.34 / 180;
       const latMercator = Math.log(Math.tan((90 + tahitiLat) * Math.PI / 360)) / (Math.PI / 180) * 20037508.34 / 180;
       
-      const zoomLevel = 200000;
+      const zoomLevel = 250000;
       
       instance.view.camera.position.set(lonMercator, latMercator, zoomLevel);
       
