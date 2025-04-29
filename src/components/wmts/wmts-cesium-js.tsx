@@ -4,7 +4,7 @@ import "cesium/Build/Cesium/Widgets/widgets.css";
 import MapContainer from '../MapContainer';
 import WMTSLayerSelector from './wmts-layer-selector';
 import { WMTSLayer } from '../../types/wmts';
-import { configureCesiumWMTS, cesiumCenter } from '../../utils/wmtsUtils';
+import { configureCesiumWMTS, cesiumCenter } from '../../utils/cesium-utils';
 
 interface WMTSCesiumJSProps {
   selectedLayer?: string;

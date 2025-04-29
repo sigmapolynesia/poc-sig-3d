@@ -4,7 +4,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import MapContainer from '../MapContainer';
 import WMTSLayerSelector from './wmts-layer-selector';
 import { useWMTS } from '../../hooks/useWMTS';
-import { configureMapLibreWMTS, maplibreCenter } from '../../utils/wmtsUtils';
+import { configureMapLibreWMTS, maplibreCenter } from '../../utils/maplibre-utils';
 
 interface WMTSMapGLProps {
   center?: [number, number];

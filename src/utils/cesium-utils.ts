@@ -1,36 +1,5 @@
 import { WMTSLayer } from '../types/wmts';
-import { generateWMTSTileUrl } from '../types/wmts-parse';
 import * as Cesium from 'cesium';
-import maplibregl from 'maplibre-gl';
-
-export const configureMapLibreWMTS = (
-  map: maplibregl.Map, 
-  layer: WMTSLayer, 
-  baseUrl: string
-): void => {
-  if (!map || !layer) return;
-
-  if (map.getSource('wmts-source')) {
-    map.removeLayer('wmts-layer');
-    map.removeSource('wmts-source');
-  }
-
-  const tileUrl = generateWMTSTileUrl(baseUrl, layer);
-
-  map.addSource('wmts-source', {
-    type: 'raster',
-    tiles: [tileUrl],
-    tileSize: 256,
-    attribution: '© Tefenua - Polynésie française'
-  });
-
-  map.addLayer({
-    id: 'wmts-layer',
-    type: 'raster',
-    source: 'wmts-source',
-    layout: { visibility: 'visible' }
-  });
-};
 
 export const configureCesiumWMTS = (
   viewer: Cesium.Viewer,
@@ -56,21 +25,8 @@ export const configureCesiumWMTS = (
 };
 
 export const posTahiti = {
-  lat: -17.67,
-  lon: -149.43,
-
-  cesiumlat: -33.2,
-  cesiumlon: -119,
-};
-
-export const maplibreCenter = (
-  map: maplibregl.Map, 
-  zoom: number = 9
-): void => {
-  if (!map) return;
-  
-  map.setCenter([posTahiti.lon, posTahiti.lat]);
-  map.setZoom(zoom);
+    cesiumlat: -33.2,
+    cesiumlon: -119,
 };
 
 export const cesiumCenter = (
