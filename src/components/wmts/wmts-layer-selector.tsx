@@ -1,6 +1,7 @@
 import React from 'react';
 import { Combobox, InputBase, Group, ActionIcon, CheckIcon, useCombobox } from '@mantine/core';
 import { WMTSLayer } from '../../types/wmts';
+import { RefreshIcon } from '../../assets/icons';
 
 
 
@@ -36,12 +37,6 @@ const WMTSLayerSelector: React.FC<WMTSLayerSelectorProps> = ({
     const layer = layers.find(l => l.identifier === id);
     return layer ? layer.title : id;
   };
-
-  const RefreshIcon = () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: '70%', height: '70%' }}>
-      <path d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4m-4 4a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
 
   return (
     <Group>
@@ -100,8 +95,10 @@ const WMTSLayerSelector: React.FC<WMTSLayerSelectorProps> = ({
         color="rgba(0, 0, 0, 1)" 
         onClick={onRefresh}
         disabled={loading}
+        title="Refresh layers"
+        aria-label="Refresh layers"
       >
-        <RefreshIcon />
+        <RefreshIcon size="70%" title="Refresh layers" ariaLabel="Refresh layers" />
       </ActionIcon>
     </Group>
   );
