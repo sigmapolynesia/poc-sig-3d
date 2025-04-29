@@ -1,7 +1,8 @@
 import React from 'react';
 import { Combobox, InputBase, Group, ActionIcon, CheckIcon, useCombobox } from '@mantine/core';
 import { WMTSLayer } from '../../types/wmts';
-import { RefreshIcon } from '../../assets/icons';
+import { faRefresh } from '@fortawesome/free-solid-svg-icons/faRefresh'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 
 
@@ -98,7 +99,7 @@ const WMTSLayerSelector: React.FC<WMTSLayerSelectorProps> = ({
         title="Refresh layers"
         aria-label="Refresh layers"
       >
-        <RefreshIcon size="70%" title="Refresh layers" ariaLabel="Refresh layers" />
+        <FontAwesomeIcon icon={faRefresh} />
       </ActionIcon>
     </Group>
   );
