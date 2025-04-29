@@ -10,7 +10,7 @@ const MapContainer: FC<MapContainerProps> = (props) => {
     <Box
       bg="rgba(217, 241, 255, 0.5)"
       w="100%"
-      h="60dvh"
+      h="74dvh"
       flex={1}
       {...props}
     />
