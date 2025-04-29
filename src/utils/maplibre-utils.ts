@@ -38,7 +38,7 @@ export const posTahiti = {
 
 export const maplibreCenter = (
   map: maplibregl.Map, 
-  zoom: number = 9
+  zoom: number = 9.15
 ): void => {
   if (!map) return;
   
