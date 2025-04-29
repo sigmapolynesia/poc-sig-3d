@@ -24,7 +24,7 @@ const WMTSCesiumJS: React.FC<WMTSCesiumJSProps> = ({
   const layers: WMTSLayer[] = [
     { 
       identifier: "TEFENUA:FOND", 
-      title: "FOND Tefenua",
+      title: "Fond Tefenua",
       format: "image/jpeg",
       tileMatrixSet: "EPSG:4326"
     },

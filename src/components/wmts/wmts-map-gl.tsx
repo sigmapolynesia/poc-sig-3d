@@ -30,7 +30,16 @@ const WMTSMapGL: React.FC<WMTSMapGLProps> = ({
   } = useWMTS(
     WMTS_URL, 
     selectedLayer,
-    (layers) => layers.filter(layer => layer.title === "Fond Léger" || layer.title === "FOND Tefenua" )
+    (layers) => {
+      const filteredLayers = layers.filter(layer => layer.title === "Fond Léger" || layer.title === "FOND Tefenua" );
+
+      filteredLayers.forEach(layer => { layer.title = layer.title === "FOND Tefenua" ? "Fond Tefenua" : layer.title; });
+
+      return filteredLayers.sort((a) => {
+        if (a.title === "Fond Tefenua") return -1;
+        return 0;
+      });
+    }
   );
 
   // 1. Initialisation de la carte
