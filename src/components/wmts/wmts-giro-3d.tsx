@@ -57,6 +57,7 @@ const WMTSGiro3D: React.FC = () => {
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
     controls.screenSpacePanning = true;
+    controls.zoomToCursor = true;
     controls.update();
      
     instance.view.setControls(controls);
