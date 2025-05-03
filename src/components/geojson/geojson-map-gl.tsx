@@ -17,17 +17,25 @@ const GeojsonMapGL = ({
 }: GeojsonMapGLProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
-  const [fileLoaded, setFileLoaded] = useState<boolean>(false);
+  const [isMapInitialized, setIsMapInitialized] = useState(false);
 
+  // Initialize map only once
   useEffect(() => {
-    if (!mapContainer.current) return;
-
-    map.current = new maplibregl.Map({
-      container: mapContainer.current,
-      style: `https://api.maptiler.com/maps/streets/style.json?key=${apiKey}`,
-      center: initialCenter,
-      zoom: initialZoom
-    });
+    if (mapContainer.current && !map.current) {
+      map.current = new maplibregl.Map({
+        container: mapContainer.current,
+        style: `https://api.maptiler.com/maps/streets/style.json?key=${apiKey}`,
+        center: initialCenter,
+        zoom: initialZoom
+      });
+      
+      map.current.on('load', () => {
+        setIsMapInitialized(true);
+        if (map.current) {
+          map.current.addControl(new maplibregl.NavigationControl());
+        }
+      });
+    }
 
     return () => {
       if (map.current) {
@@ -35,7 +43,14 @@ const GeojsonMapGL = ({
         map.current = null;
       }
     };
-  }, [initialCenter, initialZoom, apiKey]);
+  }, []); 
+
+  useEffect(() => {
+    if (map.current && isMapInitialized) {
+      map.current.setCenter(initialCenter);
+      map.current.setZoom(initialZoom);
+    }
+  }, [initialCenter, initialZoom, isMapInitialized]);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -45,37 +60,61 @@ const GeojsonMapGL = ({
     const reader = new FileReader();
 
     reader.onload = (e) => {
+      if (!e.target?.result || !map.current) return;
+      
       try {
-        if (e.target && typeof e.target.result === 'string') {
-          const geoJSONcontent = JSON.parse(e.target.result);
-
-          if (map.current?.getSource('uploaded-source')) {
+        const geoJSONcontent = JSON.parse(e.target.result as string);
+        
+        if (map.current.getSource('uploaded-source')) {
+          if (map.current.getLayer('uploaded-polygons')) {
             map.current.removeLayer('uploaded-polygons');
-            map.current.removeSource('uploaded-source');
           }
-
-          map.current?.addSource('uploaded-source', {
-            type: 'geojson',
-            data: geoJSONcontent
-          });
-
-          map.current?.addLayer({
-            id: 'uploaded-polygons',
-            type: 'fill',
-            source: 'uploaded-source',
-            paint: {
-              'fill-color': '#888888',
-              'fill-outline-color': 'red',
-              'fill-opacity': 0.4
-            },
-            filter: ['==', '$type', 'Polygon']
-          });
-
-          setFileLoaded(true);
+          map.current.removeSource('uploaded-source');
         }
+        
+        map.current.addSource('uploaded-source', {
+          type: 'geojson',
+          data: geoJSONcontent
+        });
+
+        map.current.addLayer({
+          id: 'uploaded-polygons',
+          type: 'fill',
+          source: 'uploaded-source',
+          paint: {
+            'fill-color': '#888888',
+            'fill-outline-color': 'red',
+            'fill-opacity': 0.4
+          },
+          filter: ['==', '$type', 'Polygon']
+        });
+
+        map.current?.addLayer({
+          id: 'uploaded-lines',
+          type: 'line',
+          source: 'uploaded-source',
+          paint: {
+            'line-color': '#0080ff',
+            'line-width': 3
+          },
+          filter: ['==', '$type', 'LineString']
+        });
+
+        map.current?.addLayer({
+          id: 'uploaded-points',
+          type: 'circle',
+          source: 'uploaded-source',
+          paint: {
+            'circle-radius': 6,
+            'circle-color': '#ff7800',
+            'circle-stroke-width': 2,
+            'circle-stroke-color': '#ffffff'
+          },
+          filter: ['==', '$type', 'Point']
+        });
+
       } catch (error) {
-        console.error('Erreur lors du chargement du GeoJSON:', error);
-        alert('Erreur lors du chargement du fichier GeoJSON. Vérifiez le format du fichier.');
+        console.error('Error parsing GeoJSON:', error);
       }
     };
 
@@ -93,11 +132,6 @@ const GeojsonMapGL = ({
         onChange={handleFileSelect}
         style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 1 }}
       />
-      {fileLoaded && (
-        <div style={{ position: 'absolute', bottom: '10px', left: '10px', background: 'white', padding: '5px', borderRadius: '3px', zIndex: 1 }}>
-          GeoJSON chargé avec succès!
-        </div>
-      )}
     </div>
   );
 };
