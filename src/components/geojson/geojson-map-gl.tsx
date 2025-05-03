@@ -3,6 +3,7 @@ import MapContainer from '../MapContainer';
 import maplibregl from 'maplibre-gl';
 
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY;
+const DEFAULT_GEOJSON_URL = 'https://sigmapolynesia.com/assets/test.geojson';
 
 interface GeojsonMapGLProps {
   initialCenter?: [number, number];
@@ -19,7 +20,7 @@ const GeojsonMapGL = ({
   const map = useRef<maplibregl.Map | null>(null);
   const [isMapInitialized, setIsMapInitialized] = useState(false);
 
-  // Initialize map only once
+  // Initialize the map
   useEffect(() => {
     if (mapContainer.current && !map.current) {
       map.current = new maplibregl.Map({
@@ -30,20 +31,79 @@ const GeojsonMapGL = ({
       });
       
       map.current.on('load', () => {
+        console.log('Map initialized, loading GeoJSON');
         setIsMapInitialized(true);
+        
         if (map.current) {
           map.current.addControl(new maplibregl.NavigationControl());
+          
+          fetch(DEFAULT_GEOJSON_URL)
+            .then(response => {
+              console.log('GeoJSON fetch response:', response.status);
+              if (!response.ok) {
+                throw new Error(`Failed to fetch GeoJSON: ${response.status}`);
+              }
+              return response.json();
+            })
+            .then(data => {
+              console.log('GeoJSON data loaded:', data);
+              
+              map.current!.addSource('default-geojson', {
+                type: 'geojson',
+                data: data
+              });
+              
+              map.current!.addLayer({
+                id: 'geojson-polygons',
+                type: 'fill',
+                source: 'default-geojson',
+                paint: {
+                  'fill-color': '#888888',
+                  'fill-outline-color': 'red',
+                  'fill-opacity': 0.4
+                },
+                filter: ['==', '$type', 'Polygon']
+              });
+              
+              map.current!.addLayer({
+                id: 'geojson-lines',
+                type: 'line',
+                source: 'default-geojson',
+                paint: {
+                  'line-color': '#0080ff',
+                  'line-width': 3
+                },
+                filter: ['==', '$type', 'LineString']
+              });
+              
+              map.current!.addLayer({
+                id: 'geojson-points',
+                type: 'circle',
+                source: 'default-geojson',
+                paint: {
+                  'circle-radius': 6,
+                  'circle-color': '#ff7800',
+                  'circle-stroke-width': 2,
+                  'circle-stroke-color': '#ffffff'
+                },
+                filter: ['==', '$type', 'Point']
+              });
+            
+            })
+            .catch(error => {
+              console.error('Error loading GeoJSON from URL:', error);
+            });
         }
       });
     }
-
+    
     return () => {
       if (map.current) {
         map.current.remove();
         map.current = null;
       }
     };
-  }, []); 
+  }, [apiKey, initialCenter, initialZoom]);
 
   useEffect(() => {
     if (map.current && isMapInitialized) {
@@ -65,22 +125,25 @@ const GeojsonMapGL = ({
       try {
         const geoJSONcontent = JSON.parse(e.target.result as string);
         
-        if (map.current.getSource('uploaded-source')) {
-          if (map.current.getLayer('uploaded-polygons')) {
-            map.current.removeLayer('uploaded-polygons');
+        for (const layerId of ['geojson-polygons', 'geojson-lines', 'geojson-points']) {
+          if (map.current.getLayer(layerId)) {
+            map.current.removeLayer(layerId);
           }
-          map.current.removeSource('uploaded-source');
         }
         
-        map.current.addSource('uploaded-source', {
+        if (map.current.getSource('default-geojson')) {
+          map.current.removeSource('default-geojson');
+        }
+        
+        map.current.addSource('default-geojson', {
           type: 'geojson',
           data: geoJSONcontent
         });
-
+        
         map.current.addLayer({
-          id: 'uploaded-polygons',
+          id: 'geojson-polygons',
           type: 'fill',
-          source: 'uploaded-source',
+          source: 'default-geojson',
           paint: {
             'fill-color': '#888888',
             'fill-outline-color': 'red',
@@ -88,22 +151,22 @@ const GeojsonMapGL = ({
           },
           filter: ['==', '$type', 'Polygon']
         });
-
-        map.current?.addLayer({
-          id: 'uploaded-lines',
+        
+        map.current.addLayer({
+          id: 'geojson-lines',
           type: 'line',
-          source: 'uploaded-source',
+          source: 'default-geojson',
           paint: {
             'line-color': '#0080ff',
             'line-width': 3
           },
           filter: ['==', '$type', 'LineString']
         });
-
-        map.current?.addLayer({
-          id: 'uploaded-points',
+        
+        map.current.addLayer({
+          id: 'geojson-points',
           type: 'circle',
-          source: 'uploaded-source',
+          source: 'default-geojson',
           paint: {
             'circle-radius': 6,
             'circle-color': '#ff7800',
@@ -112,7 +175,6 @@ const GeojsonMapGL = ({
           },
           filter: ['==', '$type', 'Point']
         });
-
       } catch (error) {
         console.error('Error parsing GeoJSON:', error);
       }
