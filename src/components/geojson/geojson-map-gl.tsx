@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import MapContainer from '../MapContainer';
 import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import MapContainer from '../MapContainer';
 
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY;
 const DEFAULT_GEOJSON_URL = 'https://sigmapolynesia.com/assets/test.geojson';
@@ -11,17 +12,16 @@ interface GeojsonMapGLProps {
   apiKey?: string;
 }
 
-const GeojsonMapGL = ({
-  initialCenter = [-149.43, -17.67],
-  initialZoom = 8,
+const GeojsonMapGL: React.FC<GeojsonMapGLProps> = ({
+  initialCenter = [-149.57, -17.67],
+  initialZoom = 9.15,
   apiKey = MAPTILER_KEY
-}: GeojsonMapGLProps) => {
+}) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const [isMapInitialized, setIsMapInitialized] = useState(false);
   const geojsonLoaded = useRef<boolean>(false);
 
-  // Initialize the map
   useEffect(() => {
     if (mapContainer.current && !map.current) {
       map.current = new maplibregl.Map({
@@ -79,9 +79,19 @@ const GeojsonMapGL = ({
             type: 'fill',
             source: 'default-geojson',
             paint: {
-              'fill-color': '#888888',
-              'fill-outline-color': 'red',
-              'fill-opacity': 0.4
+              'fill-color': 'rgba(100, 149, 237, 0.4)',
+              'fill-outline-color': '#0080ff',
+            },
+            filter: ['==', '$type', 'Polygon']
+          });
+          
+          map.current.addLayer({
+            id: 'geojson-polygon-outlines',
+            type: 'line',
+            source: 'default-geojson',
+            paint: {
+              'line-color': '#0080ff',
+              'line-width': 2, 
             },
             filter: ['==', '$type', 'Polygon']
           });
@@ -92,7 +102,7 @@ const GeojsonMapGL = ({
             source: 'default-geojson',
             paint: {
               'line-color': '#0080ff',
-              'line-width': 3
+              'line-width': 2
             },
             filter: ['==', '$type', 'LineString']
           });
@@ -102,7 +112,7 @@ const GeojsonMapGL = ({
             type: 'circle',
             source: 'default-geojson',
             paint: {
-              'circle-radius': 6,
+              'circle-radius': 5,
               'circle-color': '#ff7800',
               'circle-stroke-width': 2,
               'circle-stroke-color': '#ffffff'
@@ -115,11 +125,7 @@ const GeojsonMapGL = ({
       })
   };
 
-  return (
-    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-      <MapContainer ref={mapContainer} style={{ width: '100%', height: '100%', marginTop: '20px' }} />
-    </div>
-  );
+  return <MapContainer ref={mapContainer} style={{ width: '100%', height: '100%', marginTop: '20px' }} />;
 };
 
 export default GeojsonMapGL;
