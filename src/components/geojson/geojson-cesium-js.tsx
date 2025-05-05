@@ -51,7 +51,7 @@ const GeojsonCesiumJS: React.FC = () => {
     };
   }, []);
 
-  return <MapContainer ref={mapContainer} style={{ width: '100%', height: '100%' }} />;
+  return <MapContainer ref={mapContainer} style={{ width: '100%', height: '100%', marginTop: '20px' }} />;
 };
 
 export default GeojsonCesiumJS;
