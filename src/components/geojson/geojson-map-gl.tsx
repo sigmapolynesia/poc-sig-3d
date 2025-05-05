@@ -4,7 +4,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import MapContainer from '../MapContainer';
 
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY;
-const DEFAULT_GEOJSON_URL = 'https://sigmapolynesia.com/assets/test.geojson';
+const GEOJSON_URL = 'https://sigmapolynesia.com/assets/test.geojson';
 
 interface GeojsonMapGLProps {
   initialCenter?: [number, number];
@@ -60,7 +60,7 @@ const GeojsonMapGL: React.FC<GeojsonMapGLProps> = ({
   const loadGeoJSON = () => {
     if (!map.current || geojsonLoaded.current) return;
     
-    fetch(DEFAULT_GEOJSON_URL)
+    fetch(GEOJSON_URL)
       .then(response => {
         if (!response.ok) {
           throw new Error(`Failed to fetch GeoJSON: ${response.status}`);
