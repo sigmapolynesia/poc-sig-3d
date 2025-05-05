@@ -1,6 +1,17 @@
 import { WMTSLayer } from '../types/wmts';
 import * as Cesium from 'cesium';
 
+export const viewerOptions = {
+  baseLayerPicker: false,
+  geocoder: false,
+  homeButton: false,
+  navigationHelpButton: false,
+  animation: false,
+  timeline: false,
+  fullscreenButton: false,
+  terrainProvider: new Cesium.EllipsoidTerrainProvider(),
+};
+
 export const configureCesiumWMTS = (
   viewer: Cesium.Viewer,
   layer: WMTSLayer,
@@ -31,7 +42,7 @@ export const posTahiti = {
 
 export const cesiumCenter = (
   viewer: Cesium.Viewer,
-  height: number = 250000
+  height: number = 265000
 ): void => {
   if (!viewer) return;
   

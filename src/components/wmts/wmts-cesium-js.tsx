@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import * as Cesium from "cesium";
 import "cesium/Build/Cesium/Widgets/widgets.css";
 import MapContainer from '../MapContainer';
 import WMTSLayerSelector from './wmts-layer-selector';
 import { WMTSLayer } from '../../types/wmts';
-import { configureCesiumWMTS, cesiumCenter } from '../../utils/cesium-utils';
+import { configureCesiumWMTS, cesiumCenter, viewerOptions } from '../../utils/cesium-utils';
 
 interface WMTSCesiumJSProps {
   selectedLayer?: string;
@@ -14,13 +14,12 @@ const WMTSCesiumJS: React.FC<WMTSCesiumJSProps> = ({
   selectedLayer = "TEFENUA:FOND"
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const [viewer, setViewer] = useState<Cesium.Viewer | null>(null);
-  const [currentLayer, setCurrentLayer] = useState<string>(selectedLayer);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const viewer = useRef<Cesium.Viewer | null>(null);
+  const [currentLayer, setCurrentLayer] = React.useState<string>(selectedLayer);
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
   
   const WMTS_URL = "https://www.tefenua.gov.pf/api/wmts";
   
-  // Définition des couches disponibles
   const layers: WMTSLayer[] = [
     { 
       identifier: "TEFENUA:FOND", 
@@ -36,65 +35,82 @@ const WMTSCesiumJS: React.FC<WMTSCesiumJSProps> = ({
     },
   ];
 
-  // 1. Initialisation de la carte
   useEffect(() => {
     if (!mapContainer.current) return;
     
-    const viewer = new Cesium.Viewer(mapContainer.current, {
-      baseLayerPicker: false,
-      geocoder: false,
-      homeButton: false,
-      sceneModePicker: true,
-      navigationHelpButton: false,
-      animation: false,
-      timeline: false,
-      fullscreenButton: false,
-      terrainProvider: new Cesium.EllipsoidTerrainProvider()
+    viewer.current = new Cesium.Viewer(mapContainer.current, {
+      ...viewerOptions,
     });
 
-    viewer.imageryLayers.removeAll();
-    setViewer(viewer);
+    viewer.current.imageryLayers.removeAll();
+    
+    const layer = layers.find((l) => l.identifier === currentLayer);
+    if (layer && viewer.current) {
+      setIsLoading(true);
+      try {
+        configureCesiumWMTS(viewer.current, layer, WMTS_URL);
+        cesiumCenter(viewer.current);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Erreur lors du chargement de la couche WMTS:", error);
+        setIsLoading(false);
+      }
+    }
 
     return () => {
-      viewer.destroy();
+      if (viewer.current) {
+        viewer.current.destroy();
+        viewer.current = null;
+      }
     };
   }, []);
 
-  // 2. Chargement et mise à jour de la couche WMTS
   useEffect(() => {
-    if (!viewer) return;
+    if (!viewer.current) return;
+    
     setIsLoading(true);
-
-    try {
-      const layer = layers.find((l) => l.identifier === currentLayer);
-      if (!layer) return;
-      
-      configureCesiumWMTS(viewer, layer, WMTS_URL);
-      
-      // 3. Zoom sur la vue par défaut
-      cesiumCenter(viewer);
-    } catch (error) {
-      console.error("Erreur lors du chargement de la couche WMTS:", error);
-    } finally {
-      setIsLoading(false);
+    const layer = layers.find((l) => l.identifier === currentLayer);
+    
+    if (layer) {
+      try {
+        configureCesiumWMTS(viewer.current, layer, WMTS_URL);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Erreur lors du chargement de la couche WMTS:", error);
+        setIsLoading(false);
+      }
     }
-  }, [viewer, currentLayer]);
+  }, [currentLayer]);
 
   const reloadCurrentLayer = () => {
-    if (!viewer) return;
+    if (!viewer.current) return;
     
+    setIsLoading(true);
     const layer = layers.find((l) => l.identifier === currentLayer);
-    if (!layer) return;
     
-    configureCesiumWMTS(viewer, layer, WMTS_URL);
+    if (layer) {
+      try {
+        configureCesiumWMTS(viewer.current, layer, WMTS_URL);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Erreur lors du chargement de la couche WMTS:", error);
+        setIsLoading(false);
+      }
+    }
   };
 
   return (
     <div>
       <div style={{ marginBottom: '10px' }}>
-      <WMTSLayerSelector layers={layers} currentLayer={currentLayer} onLayerChange={setCurrentLayer} onRefresh={reloadCurrentLayer} loading={isLoading} />
+        <WMTSLayerSelector 
+          layers={layers} 
+          currentLayer={currentLayer} 
+          onLayerChange={setCurrentLayer} 
+          onRefresh={reloadCurrentLayer} 
+          loading={isLoading} 
+        />
       </div>
-      <MapContainer ref={mapContainer} />
+      <MapContainer ref={mapContainer} style={{ width: '100%', height: '100%' }} />
     </div>
   );
 };
