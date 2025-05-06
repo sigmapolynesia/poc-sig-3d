@@ -32,7 +32,7 @@ const GeojsonCesiumJS: React.FC = () => {
       
       const geoJsonPromise = Cesium.GeoJsonDataSource.load(GEOJSON_URL, {
         stroke: Cesium.Color.BLUE,
-        fill: Cesium.Color.BLUE.withAlpha(0.5),
+        fill: Cesium.Color.BLUE.withAlpha(0.1),
         strokeWidth: 3
       });
 
