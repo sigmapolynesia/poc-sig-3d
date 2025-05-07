@@ -3,8 +3,8 @@ import * as Cesium from 'cesium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
 import MapContainer from '../MapContainer';
 import { cesiumCenter, viewerOptions } from '../../utils/cesium-utils';
+import { GEOJSON_URL } from './config.ts'
 
-const GEOJSON_URL = 'https://sigmapolynesia.com/assets/test.geojson';
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY;
 
 const GeojsonCesiumJS: React.FC = () => {

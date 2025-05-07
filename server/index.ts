@@ -1,12 +1,19 @@
 import { fastify } from 'fastify'
 import { fastifyStatic } from '@fastify/static'
+import cors from '@fastify/cors'
 import * as path from 'node:path'
 
-const rootDir = path.resolve('')
+const rootDir = path.resolve('.')
 
 // Crée une application Fastify.
 const app = fastify({
   logger: true
+})
+
+// Autorise les requêtes depuis d'autres origines (host/port différent).
+// https://github.com/fastify/fastify-cors
+app.register(cors, {
+  origin: true
 })
 
 // Expose les fichiers statiques.
@@ -17,7 +24,7 @@ app.register(fastifyStatic, {
   lastModified: true,
   // Retourne la liste des fichiers lorsqu'on accède à /assets/
   list: true,
-  index: false,
+  index: false
 })
 
 // Démarre l'application sur le port 3000.

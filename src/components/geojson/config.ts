@@ -1,0 +1,1 @@
+export const GEOJSON_URL = 'http://localhost:3000/assets/test.geojson'

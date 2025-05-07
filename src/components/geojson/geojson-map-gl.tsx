@@ -1,11 +1,11 @@
-import { useEffect, useRef } from 'react';
-import maplibregl from 'maplibre-gl';
-import 'maplibre-gl/dist/maplibre-gl.css';
-import MapContainer from '../MapContainer';
-import { configureMapLibreGeoJSON } from '../../utils/maplibre-utils';
+import { useEffect, useRef } from 'react'
+import maplibregl from 'maplibre-gl'
+import 'maplibre-gl/dist/maplibre-gl.css'
+import MapContainer from '../MapContainer'
+import { configureMapLibreGeoJSON } from '../../utils/maplibre-utils'
+import { GEOJSON_URL } from './config.ts'
 
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY;
-const GEOJSON_URL = 'https://sigmapolynesia.com/assets/test.geojson';
 
 interface GeojsonMapGLProps {
   center?: [number, number];

@@ -6,6 +6,7 @@ import Extent from "@giro3d/giro3d/core/geographic/Extent.js";
 import Instance from "@giro3d/giro3d/core/Instance.js";
 import Map from "@giro3d/giro3d/entities/Map.js";
 import { configureGiro3dGeoJSON, addMapTilerBaseLayer, centerViewOnLocation } from '../../utils/giro-utils';
+import { GEOJSON_URL } from './config.ts'
 
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY;
 
@@ -64,7 +65,7 @@ const GeojsonGiro3D: React.FC = () => {
         );
         
         await configureGiro3dGeoJSON(
-          'https://sigmapolynesia.com/assets/test.geojson',
+          GEOJSON_URL,
           map,
           MAPTILER_KEY,
           'EPSG:4326'
