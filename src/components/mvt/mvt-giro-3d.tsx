@@ -20,7 +20,8 @@ interface WMTSLayerOptions {
 }
 
 const generateOpenLayersWMTSTileUrl = (layer: WMTSLayerOptions): string => {
-  return `${layer.host}/geoserver/gwc/service/wmts/rest/${layer.identifier}/${layer.style || ''}/${layer.tileMatrixSet}/{z}/{y}/{x}?format=${layer.format}`;
+  return `${layer.host}/geoserver/gwc/service/wmts/rest/${layer.identifier}/${layer.style}/${layer.tileMatrixSet}/{z}/{y}/{x}?format=${layer.format}`;
+  //return `${layer.host}/geoserver/gwc/service/wmts?service=WMTS&request=GetTile&version=1.0.0&layer=${layer.identifier}&style=${layer.style}&tilematrix=${layer.tileMatrixSet}:{z}&tilematrixset=${layer.tileMatrixSet}&tilecol={x}&tilerow={y}&format=${layer.format}`;
 };
 
 const MVTGiro3D = () => {
@@ -38,7 +39,6 @@ const MVTGiro3D = () => {
       tileMatrixSet: 'EPSG:4326'
     };
 
-    // Style pour la couche PGA
     const pgaStyle = new Style({
       fill: new Fill({
         color: 'rgba(0, 100, 200, 0.5)'
