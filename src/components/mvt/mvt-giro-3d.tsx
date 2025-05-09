@@ -9,6 +9,7 @@ import MVT from 'ol/format/MVT';
 import { Fill, Stroke, Style } from 'ol/style';
 import { fromLonLat } from 'ol/proj';
 import 'ol/ol.css';
+import MapContainer from '../MapContainer';
 
 interface WMTSLayerOptions {
   host: string;
@@ -87,7 +88,7 @@ const MVTGiro3D = () => {
     };
   }, []);
 
-  return <div ref={mapContainer} style={{ height: '100%', width: '100%', minHeight: '500px', marginTop: '20px' }} />;
+  return <MapContainer ref={mapContainer} style={{ height: '100%', width: '100%', marginTop: '20px' }} />;
 };
 
 export default MVTGiro3D;
