@@ -12,7 +12,7 @@ interface WMTSLayerOptions {
 }
 
 const generateMapLibreWMTSTileUrl = (layer: WMTSLayerOptions): string => {
-  return `${layer.host}/geoserver/gwc/service/wmts/rest/${layer.identifier}/${layer.tileMatrixSet}/${layer.tileMatrixSet}:{z}/{y}/{x}?format=${layer.format}`;
+  return `${layer.host}/geoserver/gwc/service/wmts/rest/${layer.identifier}/${layer.style}/${layer.tileMatrixSet}/${layer.tileMatrixSet}:{z}/{y}/{x}?format=${layer.format}`;
   //return `${layer.host}/geoserver/gwc/service/wmts?service=WMTS&request=GetTile&version=1.0.0&layer=${layer.identifier}&style=${layer.style}&tilematrix=${layer.tileMatrixSet}:{z}&tilematrixset=${layer.tileMatrixSet}&tilecol={x}&tilerow={y}&format=${layer.format}`;
 };
 
@@ -72,7 +72,7 @@ const MVTMapGL = () => {
           }
         ]
       },
-      center: [-149.56, -17.53],
+      center: [-149.58, -17.66],
       zoom: 12
     });
 
