@@ -19,6 +19,13 @@ export default defineConfig({
       overlay: true,
     },
     open: true,
+    proxy: {
+      '/geoserver': {
+        target: 'https://geoserver.sigmapolynesia.com',
+        changeOrigin: true,
+        secure: false, 
+      }
+    }
   },
   build: {
     target: 'esnext',
