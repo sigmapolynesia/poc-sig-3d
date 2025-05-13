@@ -1,35 +1,28 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import MapContainer from '../MapContainer';
-import { calculateTileCoordinates } from './tileUtils';
 
-interface WMTSLayerOptions {
+interface TMSLayerOptions {
   host: string;
   identifier: string;
 }
 
-const generateMapLibreWMTSTileUrl = (layer: WMTSLayerOptions): string => {
+const generateMapLibreTMSTileUrl = (layer: TMSLayerOptions): string => {
   return `${layer.host}/geoserver/gwc/service/tms/1.0.0/${layer.identifier}@WebMercatorQuad@pbf/{z}/{x}/{y}.pbf?flipy=true`;
 };
 
-const MVTMapGL: React.FC = () => {
+interface MVTMapGLProps {
+  center?: [number, number]; 
+  zoom?: number;
+}
+
+const MVTMapGL: React.FC<MVTMapGLProps> = ({
+  center = [-149.55, -17.70],
+  zoom = 12,
+  }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<maplibregl.Map | null>(null);
-
-  const [currentCoords, setCurrentCoords] = useState<{
-    lat: number;
-    lng: number;
-    zoom: number;
-    tileX: number;
-    tileY: number;
-  }>({
-    lat: -17.7,
-    lng: -149.6,
-    zoom: 12,
-    tileX: 0,
-    tileY: 0
-  });
 
   useEffect(() => {
     if (!mapContainer.current || mapInstance.current) return;
@@ -61,16 +54,17 @@ const MVTMapGL: React.FC = () => {
           }
         ]
       },
-      center: [currentCoords.lng, currentCoords.lat],
-      zoom: currentCoords.zoom
+      center: center,
+      zoom: zoom
     });
 
     mapInstance.current = map;
+    map.addControl(new maplibregl.NavigationControl());
 
     map.on('load', () => {
       map.addSource('pga-source', {
         type: 'vector',
-        tiles: [generateMapLibreWMTSTileUrl(pgaLayer)],
+        tiles: [generateMapLibreTMSTileUrl(pgaLayer)],
         bounds: [-149.7, -17.8, -149.5, -17.6],
         minzoom: 0,
         maxzoom: 21
@@ -88,12 +82,6 @@ const MVTMapGL: React.FC = () => {
         minzoom: 0,
         maxzoom: 22
       });
-
-      updateTileCoordinates(map);
-    });
-
-    map.on('moveend', () => {
-      updateTileCoordinates(map);
     });
 
     map.on('error', (e) => {
@@ -108,34 +96,15 @@ const MVTMapGL: React.FC = () => {
     };
   }, []);
 
-  const updateTileCoordinates = (map: maplibregl.Map) => {
-    const center = map.getCenter();
-    const zoom = Math.floor(map.getZoom());
-
-    const { x, y } = calculateTileCoordinates(center.lat, center.lng, zoom);
-
-    // Inverser l'indice Y pour convertir de TMS à XYZ
-    const yInverted = (1 << zoom) - 1 - y;
-
-    setCurrentCoords({
-      lat: center.lat,
-      lng: center.lng,
-      zoom: zoom,
-      tileX: x,
-      tileY: yInverted
-    });
-  };
+  useEffect(() => {
+    if (mapInstance.current) {
+      mapInstance.current.setCenter(center);
+      mapInstance.current.setZoom(zoom);
+    }
+  }, [center, zoom]);
 
   return (
-    <div className="mvt-map-container">
-      <MapContainer ref={mapContainer} style={{ marginTop: '20px', height: '100%', width: '100%' }} />
-
-      <div className="p-2 bg-white border mt-2">
-        <div>Center: {currentCoords.lng.toFixed(6)}, {currentCoords.lat.toFixed(6)}</div>
-        <div>Zoom: {currentCoords.zoom}</div>
-        <div>Tile: X={currentCoords.tileX}, Y={currentCoords.tileY}</div>
-      </div>
-    </div>
+    <MapContainer ref={mapContainer} style={{ marginTop: '20px', height: '100%', width: '100%' }} />
   );
 };
 
