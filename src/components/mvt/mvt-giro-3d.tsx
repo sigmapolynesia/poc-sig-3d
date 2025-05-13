@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
+import 'ol/ol.css';
 import Map from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
@@ -6,78 +7,78 @@ import VectorTileLayer from 'ol/layer/VectorTile';
 import OSM from 'ol/source/OSM';
 import VectorTileSource from 'ol/source/VectorTile';
 import MVT from 'ol/format/MVT';
-import { Fill, Stroke, Style } from 'ol/style';
 import { fromLonLat } from 'ol/proj';
-import 'ol/ol.css';
+import { Style, Fill, Stroke } from 'ol/style';
 import MapContainer from '../MapContainer';
 
-interface WMTSLayerOptions {
+interface TMSLayerOptions {
   host: string;
   identifier: string;
-  style?: string;
-  format: string;
-  tileMatrixSet: string;
 }
 
-const generateOpenLayersWMTSTileUrl = (layer: WMTSLayerOptions): string => {
-  return `${layer.host}/geoserver/gwc/service/wmts/rest/${layer.identifier}/${layer.tileMatrixSet}/{z}/{y}/{x}?format=${layer.format}`;
-  //return `${layer.host}/geoserver/gwc/service/wmts?service=WMTS&request=GetTile&version=1.0.0&layer=${layer.identifier}&style=${layer.style}&tilematrix=${layer.tileMatrixSet}:{z}&tilematrixset=${layer.tileMatrixSet}&tilecol={x}&tilerow={y}&format=${layer.format}`;
+const generateOpenLayersTMSUrl = (layer: TMSLayerOptions): string => {
+  return `${layer.host}/geoserver/gwc/service/tms/1.0.0/${layer.identifier}@WebMercatorQuad@pbf/{z}/{x}/{-y}.pbf`;
 };
 
-const MVTGiro3D = () => {
+interface MVTGiro3DProps {
+  center?: [number, number];
+  zoom?: number;
+}
+
+const MVTGiro3D: React.FC<MVTGiro3DProps> = ({
+  center = [-149.55, -17.70],
+  zoom = 13,
+}) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<Map | null>(null);
 
   useEffect(() => {
-    if (!mapContainer.current) return;
-    
+    if (!mapContainer.current || mapInstance.current) return;
+
     const pgaLayer = {
       host: 'https://geoserver.sigmapolynesia.com',
-      identifier: 'PAEA:PGA',
-      style: '',
-      format: 'application/vnd.mapbox-vector-tile',
-      tileMatrixSet: 'EPSG:4326'
+      identifier: encodeURIComponent('PAEA:PGA')
     };
 
-    const pgaStyle = new Style({
-      fill: new Fill({
-        color: 'rgba(0, 100, 200, 0.5)'
-      }),
-      stroke: new Stroke({
-        color: 'rgba(0, 100, 200, 1)',
-        width: 1
-      })
-    });
-
-    const pgaSource = new VectorTileSource({
-      format: new MVT(),
-      url: generateOpenLayersWMTSTileUrl(pgaLayer),
-      maxZoom: 21
-    });
+    const olCenter = fromLonLat(center);
 
     const osmLayer = new TileLayer({
-      source: new OSM()
+      source: new OSM(),
     });
 
-    const pgaVectorLayer = new VectorTileLayer({
-      source: pgaSource,
-      style: pgaStyle
+    const mvtSource = new VectorTileSource({
+      format: new MVT(),
+      url: generateOpenLayersTMSUrl(pgaLayer),
+      maxZoom: 21,
+    });
+
+    const mvtLayer = new VectorTileLayer({
+      source: mvtSource,
+      style: new Style({
+        fill: new Fill({
+          color: 'rgba(0, 100, 200, 0.5)',
+        }),
+        stroke: new Stroke({
+          color: 'rgba(0, 100, 200, 1)',
+          width: 1,
+        }),
+      }),
     });
 
     const map = new Map({
       target: mapContainer.current,
-      layers: [osmLayer, pgaVectorLayer],
+      layers: [osmLayer, mvtLayer],
       view: new View({
-        center: fromLonLat([-149.58, -17.66]), 
-        zoom: 12,
-        maxZoom: 22
-      })
+        center: olCenter,
+        zoom: zoom,
+        maxZoom: 22,
+      }),
     });
 
     mapInstance.current = map;
 
-    pgaSource.on('tileloaderror', (e) => {
-      console.error('Erreur de chargement des tuiles:', e);
+    mvtSource.on('tileloaderror', (e) => {
+      console.error('Erreur chargement tuile OpenLayers:', e);
     });
 
     return () => {
@@ -88,7 +89,17 @@ const MVTGiro3D = () => {
     };
   }, []);
 
-  return <MapContainer ref={mapContainer} style={{ height: '100%', width: '100%', marginTop: '20px' }} />;
+  useEffect(() => {
+    if (mapInstance.current) {
+      const view = mapInstance.current.getView();
+      view.setCenter(fromLonLat(center));
+      view.setZoom(zoom);
+    }
+  }, [center, zoom]);
+
+  return (
+    <MapContainer ref={mapContainer} style={{ marginTop: '20px', height: '100%', width: '100%' }} />
+  );
 };
 
 export default MVTGiro3D;
