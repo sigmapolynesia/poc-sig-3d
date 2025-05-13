@@ -137,46 +137,49 @@ const MVTLayerSelector: React.FC<MVTLayerSelectorProps> = ({
           size="xs"
         />
 
-        {layers.length > 0 && (
-          <>
-            <Title order={4}>Layers</Title>
-            {layers.map(layer => (
-              <Box key={layer.id} mb="sm">
-                <Button 
-                  variant="subtle" 
-                  onClick={() => toggleLayerCollapse(layer.id)}
-                  style={{ color: layer.color, fontWeight: 'bold', padding: '2px 8px', fontSize: '0.875rem' }}
+{layers.length > 0 && (
+  <>
+    <Title order={4}>Layers</Title>
+    {layers.map(layer => (
+      <Box key={layer.id} mb="sm">
+        <Button
+          variant="subtle"
+          onClick={() => toggleLayerCollapse(layer.id)}
+          style={{ color: layer.color, fontWeight: 'bold', padding: '2px 8px', fontSize: '0.875rem' }}
+        >
+          {layer.id} {collapsedLayers[layer.id] ? '►' : '▼'}
+        </Button>
+        <Text size="xs" color="dimmed">
+          Source Layer: {layer.sourceLayer}
+        </Text>
+        {!collapsedLayers[layer.id] && (
+          <Table style={{ fontSize: '0.75rem' }} highlightOnHover>
+            <tbody>
+              {layer.keys.map(key => (
+                <tr
+                  key={key}
+                  onClick={() => onAttributeClick(key, layer.id)}
+                  style={{ cursor: 'pointer' }}
                 >
-                  {layer.id} {collapsedLayers[layer.id] ? '►' : '▼'}
-                </Button>
-                
-                {!collapsedLayers[layer.id] && (
-                  <Table style={{ fontSize: '0.75rem' }} highlightOnHover>
-                    <tbody>
-                      {layer.keys.map(key => (
-                        <tr 
-                          key={key} 
-                          onClick={() => onAttributeClick(key, layer.id)}
-                          style={{ cursor: 'pointer' }}
-                        >
-                          <td style={{ width: '20px' }}>
-                            {key === focusedAttribute && focusedLayer === layer.id && '→'}
-                          </td>
-                          <td>{key}</td>
-                          <td>
-                            {layerValues[layer.id] && layerValues[layer.id][key] !== undefined
-                              ? String(layerValues[layer.id][key])
-                              : ''}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                )}
-              </Box>
-            ))}
-          </>
+                  <td style={{ width: '20px' }}>
+                    {key === focusedAttribute && focusedLayer === layer.id && '→'}
+                  </td>
+                  <td>{key}</td>
+                  <td>
+                    {layerValues[layer.id] && layerValues[layer.id][key] !== undefined
+                      ? String(layerValues[layer.id][key])
+                      : ''}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
         )}
+      </Box>
+    ))}
+  </>
+)}
+
 
         {focusedAttribute && valueCounts.length > 0 && (
           <>

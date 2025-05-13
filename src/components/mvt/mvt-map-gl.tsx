@@ -7,19 +7,16 @@ import { calculateTileCoordinates } from './tileUtils';
 interface WMTSLayerOptions {
   host: string;
   identifier: string;
-  style?: string;
-  format: string;
-  tileMatrixSet: string;
 }
 
 const generateMapLibreWMTSTileUrl = (layer: WMTSLayerOptions): string => {
-  return `${layer.host}/geoserver/gwc/service/wmts/rest/${layer.identifier}/${layer.tileMatrixSet}/${layer.tileMatrixSet}:{z}/{y}/{x}?format=${layer.format}`;
+  return `${layer.host}/geoserver/gwc/service/tms/1.0.0/${layer.identifier}@WebMercatorQuad@pbf/{z}/{x}/{y}.pbf?flipy=true`;
 };
 
 const MVTMapGL: React.FC = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<maplibregl.Map | null>(null);
-  
+
   const [currentCoords, setCurrentCoords] = useState<{
     lat: number;
     lng: number;
@@ -39,10 +36,7 @@ const MVTMapGL: React.FC = () => {
 
     const pgaLayer = {
       host: 'https://geoserver.sigmapolynesia.com',
-      identifier: 'PAEA:PGA',
-      style: '',
-      format: 'application/vnd.mapbox-vector-tile',
-      tileMatrixSet: 'EPSG:4326'
+      identifier: encodeURIComponent('PAEA:PGA')
     };
 
     const map = new maplibregl.Map({
@@ -86,7 +80,7 @@ const MVTMapGL: React.FC = () => {
         id: 'pga-layer',
         type: 'fill',
         source: 'pga-source',
-        'source-layer': 'PAEA:PGA',
+        'source-layer': 'pga_zone_urba_v',
         paint: {
           'fill-color': 'rgba(0, 100, 200, 0.5)',
           'fill-outline-color': 'rgba(0, 100, 200, 1)'
@@ -94,14 +88,14 @@ const MVTMapGL: React.FC = () => {
         minzoom: 0,
         maxzoom: 22
       });
-      
+
       updateTileCoordinates(map);
     });
 
     map.on('moveend', () => {
       updateTileCoordinates(map);
     });
-    
+
     map.on('error', (e) => {
       console.error('Erreur MapLibre:', e);
     });
@@ -117,22 +111,25 @@ const MVTMapGL: React.FC = () => {
   const updateTileCoordinates = (map: maplibregl.Map) => {
     const center = map.getCenter();
     const zoom = Math.floor(map.getZoom());
-    
+
     const { x, y } = calculateTileCoordinates(center.lat, center.lng, zoom);
-    
+
+    // Inverser l'indice Y pour convertir de TMS à XYZ
+    const yInverted = (1 << zoom) - 1 - y;
+
     setCurrentCoords({
       lat: center.lat,
       lng: center.lng,
       zoom: zoom,
       tileX: x,
-      tileY: y
+      tileY: yInverted
     });
   };
 
   return (
     <div className="mvt-map-container">
       <MapContainer ref={mapContainer} style={{ marginTop: '20px', height: '100%', width: '100%' }} />
-      
+
       <div className="p-2 bg-white border mt-2">
         <div>Center: {currentCoords.lng.toFixed(6)}, {currentCoords.lat.toFixed(6)}</div>
         <div>Zoom: {currentCoords.zoom}</div>
