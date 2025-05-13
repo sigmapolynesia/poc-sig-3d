@@ -13,7 +13,7 @@ interface WMTSLayerOptions {
 }
 
 const generateMapLibreWMTSTileUrl = (layer: WMTSLayerOptions): string => {
-  return `${layer.host}/geoserver/gwc/service/wmts/rest/${layer.identifier}/${layer.style || ''}/${layer.tileMatrixSet}/${layer.tileMatrixSet}:{z}/{y}/{x}?format=${layer.format}`;
+  return `${layer.host}/geoserver/gwc/service/wmts/rest/${layer.identifier}/${layer.tileMatrixSet}/${layer.tileMatrixSet}:{z}/{y}/{x}?format=${layer.format}`;
 };
 
 const MVTMapGL: React.FC = () => {
