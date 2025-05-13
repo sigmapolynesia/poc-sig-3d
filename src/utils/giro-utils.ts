@@ -7,6 +7,8 @@ import ColorLayer from '@giro3d/giro3d/core/layer/ColorLayer';
 import TiledImageSource from '@giro3d/giro3d/sources/TiledImageSource';
 import XYZ from 'ol/source/XYZ';
 import { transform } from 'ol/proj';
+import { StyleFunction } from 'ol/style/Style';
+
 
 export const addMapTilerBaseLayer = async (
   map: Map, 
@@ -154,4 +156,30 @@ export const centerViewOnLocation = (
   instance.view.camera.position.set(x, y, height);
   controls.target.set(x, y, 0);
   controls.update();
+};
+
+export const createMVTStyle = (): StyleFunction => {
+  const fill = new Fill({ color: 'rgba(0, 100, 200, 0.5)' });
+  const stroke = new Stroke({ color: 'rgba(0, 100, 200, 1)', width: 1 });
+  
+  return (feature: FeatureLike) => {
+    const geometryType = feature.getGeometry()?.getType();
+    
+    if (geometryType === 'Polygon' || geometryType === 'MultiPolygon') {
+      return new Style({
+        fill: fill,
+        stroke: stroke
+      });
+    } 
+    else if (geometryType === 'LineString' || geometryType === 'MultiLineString') {
+      return new Style({
+        stroke: stroke
+      });
+    }
+    else {
+      return new Style({
+        stroke: stroke
+      });
+    }
+  };
 };

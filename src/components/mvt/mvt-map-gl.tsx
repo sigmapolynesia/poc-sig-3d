@@ -2,15 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import MapContainer from '../MapContainer';
-
-interface TMSLayerOptions {
-  host: string;
-  identifier: string;
-}
-
-const generateMapLibreTMSTileUrl = (layer: TMSLayerOptions): string => {
-  return `${layer.host}/geoserver/gwc/service/tms/1.0.0/${layer.identifier}@WebMercatorQuad@pbf/{z}/{x}/{y}.pbf?flipy=true`;
-};
+import { generateTMSTileUrl } from '../../types/tms-parse.ts'
 
 interface MVTMapGLProps {
   center?: [number, number]; 
@@ -64,7 +56,7 @@ const MVTMapGL: React.FC<MVTMapGLProps> = ({
     map.on('load', () => {
       map.addSource('pga-source', {
         type: 'vector',
-        tiles: [generateMapLibreTMSTileUrl(pgaLayer)],
+        tiles: [generateTMSTileUrl(pgaLayer)],
         bounds: [-149.7, -17.8, -149.5, -17.6],
         minzoom: 0,
         maxzoom: 21

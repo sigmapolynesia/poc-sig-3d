@@ -1,105 +1,115 @@
-import React, { useEffect, useRef } from 'react';
-import 'ol/ol.css';
-import Map from 'ol/Map';
-import View from 'ol/View';
-import TileLayer from 'ol/layer/Tile';
-import VectorTileLayer from 'ol/layer/VectorTile';
-import OSM from 'ol/source/OSM';
-import VectorTileSource from 'ol/source/VectorTile';
-import MVT from 'ol/format/MVT';
-import { fromLonLat } from 'ol/proj';
-import { Style, Fill, Stroke } from 'ol/style';
+import { useEffect, useRef } from 'react';
 import MapContainer from '../MapContainer';
+import 'ol/ol.css';
+import { MapControls } from "three/examples/jsm/controls/MapControls.js";
+import Extent from "@giro3d/giro3d/core/geographic/Extent.js";
+import Instance from "@giro3d/giro3d/core/Instance.js";
+import Map from "@giro3d/giro3d/entities/Map.js";
+import ColorLayer from "@giro3d/giro3d/core/layer/ColorLayer.js";
+import VectorTileSource from "@giro3d/giro3d/sources/VectorTileSource.js";
+import TiledImageSource from "@giro3d/giro3d/sources/TiledImageSource.js";
+import XYZ from 'ol/source/XYZ';
+import { createMVTStyle,centerViewOnLocation } from '../../utils/giro-utils';
+import { generateTMSTileUrl } from '../../types/tms-parse.ts'
 
-interface TMSLayerOptions {
-  host: string;
-  identifier: string;
-}
+const TAHITI_LAT = -17.70;
+const TAHITI_LON = -149.55;
 
-const generateOpenLayersTMSUrl = (layer: TMSLayerOptions): string => {
-  return `${layer.host}/geoserver/gwc/service/tms/1.0.0/${layer.identifier}@WebMercatorQuad@pbf/{z}/{x}/{-y}.pbf`;
-};
-
-interface MVTGiro3DProps {
-  center?: [number, number];
-  zoom?: number;
-}
-
-const MVTGiro3D: React.FC<MVTGiro3DProps> = ({
-  center = [-149.55, -17.70],
-  zoom = 13,
-}) => {
+const MVTGiro3D: React.FC = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const mapInstance = useRef<Map | null>(null);
+  const mapRef = useRef<Map | null>(null);
 
   useEffect(() => {
-    if (!mapContainer.current || mapInstance.current) return;
+    if (!mapContainer.current) {
+      console.error("Map container ref is missing");
+      return;
+    }
+    
+    const extent = new Extent(
+      "EPSG:3857",
+      -20037508.34, 20037508.34, -20037508.34, 20037508.34
+    );
 
-    const pgaLayer = {
-      host: 'https://geoserver.sigmapolynesia.com',
-      identifier: encodeURIComponent('PAEA:PGA')
+    let instance = new Instance({
+      target: mapContainer.current,
+      crs: extent.crs,
+      backgroundColor: 0x0a3b59,
+      renderer: {
+        antialias: true,
+        alpha: false,  
+        preserveDrawingBuffer: true
+      }
+    });
+
+    const map = new Map({ extent });
+    instance.add(map);
+
+    let controls = new MapControls(instance.view.camera, instance.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.25;
+    controls.screenSpacePanning = true;
+    controls.zoomToCursor = true;
+    controls.update();
+    instance.view.setControls(controls);
+
+    const initializeMap = async () => {
+      try {
+        const osmSource = new TiledImageSource({
+          source: new XYZ({
+            url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            crossOrigin: 'anonymous',
+          })
+        });
+
+        const osmLayer = new ColorLayer({
+          name: 'osm',
+          source: osmSource,
+          extent: map.extent,
+        });
+
+        await map.addLayer(osmLayer);
+        
+        centerViewOnLocation(
+          instance, 
+          controls, 
+          TAHITI_LON, 
+          TAHITI_LAT, 
+          10,
+        );
+
+        const pgaLayer = {
+          host: 'https://geoserver.sigmapolynesia.com',
+          identifier: encodeURIComponent('PAEA:PGA')
+        };
+        
+        const vectorTileSource = new VectorTileSource({
+          url: generateTMSTileUrl(pgaLayer),
+          style: createMVTStyle()
+        });
+
+        const vectorTileLayer = new ColorLayer({
+          name: 'mvt-layer',
+          source: vectorTileSource,
+          extent: map.extent,
+        });
+
+        await map.addLayer(vectorTileLayer);
+      } catch (error) {
+        console.error('Error initializing map:', error);
+      }
     };
 
-    const olCenter = fromLonLat(center);
-
-    const osmLayer = new TileLayer({
-      source: new OSM(),
-    });
-
-    const mvtSource = new VectorTileSource({
-      format: new MVT(),
-      url: generateOpenLayersTMSUrl(pgaLayer),
-      maxZoom: 21,
-    });
-
-    const mvtLayer = new VectorTileLayer({
-      source: mvtSource,
-      style: new Style({
-        fill: new Fill({
-          color: 'rgba(0, 100, 200, 0.5)',
-        }),
-        stroke: new Stroke({
-          color: 'rgba(0, 100, 200, 1)',
-          width: 1,
-        }),
-      }),
-    });
-
-    const map = new Map({
-      target: mapContainer.current,
-      layers: [osmLayer, mvtLayer],
-      view: new View({
-        center: olCenter,
-        zoom: zoom,
-        maxZoom: 22,
-      }),
-    });
-
-    mapInstance.current = map;
-
-    mvtSource.on('tileloaderror', (e) => {
-      console.error('Erreur chargement tuile OpenLayers:', e);
-    });
+    initializeMap();
+    mapRef.current = map;
 
     return () => {
-      if (mapInstance.current) {
-        mapInstance.current.setTarget(undefined);
-        mapInstance.current = null;
+      if (instance) {
+        instance.dispose();
       }
     };
   }, []);
 
-  useEffect(() => {
-    if (mapInstance.current) {
-      const view = mapInstance.current.getView();
-      view.setCenter(fromLonLat(center));
-      view.setZoom(zoom);
-    }
-  }, [center, zoom]);
-
-  return (
-    <MapContainer ref={mapContainer} style={{ marginTop: '20px', height: '100%', width: '100%' }} />
-  );
+  return <MapContainer ref={mapContainer} style={{ width: '100%', height: '100%', marginTop: '20px' }}/>;
 };
 
 export default MVTGiro3D;
