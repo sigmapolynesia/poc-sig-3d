@@ -1,13 +1,11 @@
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import MapContainer from '../MapContainer';
-import {LASWorkerLoader} from '@loaders.gl/las';
+import {LASLoader} from '@loaders.gl/las';
 import { PointCloudLayer } from '@deck.gl/layers';
 import { DeckGL } from '@deck.gl/react';
-import { OrbitView, LinearInterpolator } from '@deck.gl/core';
+import { OrbitView } from '@deck.gl/core';
 import { LAZ_URL } from './config.ts';
 import type {OrbitViewState} from '@deck.gl/core';
-
-type LASMesh = (typeof LASWorkerLoader)['dataType'];
 
 const INITIAL_VIEW_STATE: OrbitViewState = {
   target: [0, 0, 0],
@@ -18,33 +16,19 @@ const INITIAL_VIEW_STATE: OrbitViewState = {
   zoom: 1 
 };
 
-const transitionInterpolator = new LinearInterpolator(['rotationOrbit']);
-
+type DataType = {
+  color: [r: number, g: number, b: number];
+};
 
 
 const LidarMapGL = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const [viewState, updateViewState] = useState<OrbitViewState>(INITIAL_VIEW_STATE);
-  const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (!isLoaded) {
-      return;
-    }
-    const rotateCamera = () => {
-      updateViewState(v => ({
-        ...v,
-        rotationOrbit: v.rotationOrbit! + 120,
-        transitionDuration: 2400,
-        transitionInterpolator,
-        onTransitionEnd: rotateCamera
-      }));
-    };
-    rotateCamera();
-  }, [isLoaded]);
-
-  const onDataLoad = useCallback((data: any) => {
-    const header = (data as LASMesh).header!;
+ const onDataLoad = useCallback((data: any) => {
+    console.log('Loaded data:', data);
+    
+    const header = (data).header!;
     if (header.boundingBox) {
       const [mins, maxs] = header.boundingBox;
       updateViewState({
@@ -52,26 +36,25 @@ const LidarMapGL = () => {
         target: [(mins[0] + maxs[0]) / 2, (mins[1] + maxs[1]) / 2, (mins[2] + maxs[2]) / 2],
         zoom: Math.log2(window.innerWidth / (maxs[0] - mins[0])) - 1
       });
-      setIsLoaded(true);
     }
   }, []);
 
 
   const layers = [
-    new PointCloudLayer<LASMesh>({
-      id: 'laz-point-cloud-layer',
+    new PointCloudLayer({
+      id: 'LazPointCloudLayer',
       data: LAZ_URL,
       onDataLoad,
       getNormal: [0, 1, 0],
-      getColor: [255, 255, 255],
+      getColor: (d: DataType) => d.color,
       opacity: 0.5,
-      pointSize: 0.5,
-      loaders: [LASWorkerLoader]
+      pointSize: 0.75,
+      loaders: [LASLoader]
     })
   ];
 
   return (
-    <div style={{ position: 'relative', height: '800px', width: '100%', marginTop: '20px' }}>
+    <div style={{ position: 'relative', height: '1000px', width: '100%', marginTop: '20px' }}>
       <DeckGL
         views={new OrbitView()}
         initialViewState={viewState}
