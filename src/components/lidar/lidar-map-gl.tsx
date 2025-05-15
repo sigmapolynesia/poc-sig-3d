@@ -16,11 +16,6 @@ const INITIAL_VIEW_STATE: OrbitViewState = {
   zoom: 1 
 };
 
-type DataType = {
-  color: [r: number, g: number, b: number];
-};
-
-
 const LidarMapGL = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const [viewState, updateViewState] = useState<OrbitViewState>(INITIAL_VIEW_STATE);
@@ -41,17 +36,34 @@ const LidarMapGL = () => {
 
 
   const layers = [
-    new PointCloudLayer({
-      id: 'LazPointCloudLayer',
-      data: LAZ_URL,
-      onDataLoad,
-      getNormal: [0, 1, 0],
-      getColor: (d: DataType) => d.color,
-      opacity: 0.5,
-      pointSize: 0.75,
-      loaders: [LASLoader]
-    })
-  ];
+  new PointCloudLayer({
+    id: 'LazPointCloudLayer',
+    data: LAZ_URL,
+    onDataLoad,
+    opacity: 1.0, 
+    pointSize: 1.5, 
+    loaders: [LASLoader],
+    loadOptions: {
+      las: {
+        colorDepth: 'auto' 
+      }
+    },
+    getColor: (point) => {
+      if (point.color) {
+        return point.color;
+      }
+      if (point.hasOwnProperty('r') && point.hasOwnProperty('g') && point.hasOwnProperty('b')) {
+        return [point.r, point.g, point.b];
+      }
+      const normalizedZ = (point.position[2] - viewState.target[2]) / 50; 
+      return [
+        Math.min(255, Math.max(0, 128 + normalizedZ * 127)),
+        Math.min(255, Math.max(0, 128 + normalizedZ * 127)),
+        Math.min(255, Math.max(0, 128 + normalizedZ * 127))
+      ];
+    }
+  })
+];
 
   return (
     <div style={{ position: 'relative', height: '1000px', width: '100%', marginTop: '20px' }}>
