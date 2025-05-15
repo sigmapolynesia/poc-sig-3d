@@ -26,7 +26,7 @@ const LidarMapGL = () => {
   const [viewState, updateViewState] = useState<OrbitViewState>(INITIAL_VIEW_STATE);
 
  const onDataLoad = useCallback((data: any) => {
-    console.log('Loaded data:', data);
+    console.log('Loaded data:', data); 
     
     const header = (data).header!;
     if (header.boundingBox) {
