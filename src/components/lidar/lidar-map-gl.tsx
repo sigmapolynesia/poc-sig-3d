@@ -36,34 +36,21 @@ const LidarMapGL = () => {
 
 
   const layers = [
-  new PointCloudLayer({
-    id: 'LazPointCloudLayer',
-    data: LAZ_URL,
-    onDataLoad,
-    opacity: 1.0, 
-    pointSize: 1.5, 
-    loaders: [LASLoader],
-    loadOptions: {
-      las: {
-        colorDepth: 'auto' 
-      }
-    },
-    getColor: (point) => {
-      if (point.color) {
-        return point.color;
-      }
-      if (point.hasOwnProperty('r') && point.hasOwnProperty('g') && point.hasOwnProperty('b')) {
-        return [point.r, point.g, point.b];
-      }
-      const normalizedZ = (point.position[2] - viewState.target[2]) / 50; 
-      return [
-        Math.min(255, Math.max(0, 128 + normalizedZ * 127)),
-        Math.min(255, Math.max(0, 128 + normalizedZ * 127)),
-        Math.min(255, Math.max(0, 128 + normalizedZ * 127))
-      ];
-    }
-  })
-];
+    new PointCloudLayer({
+      id: 'LazPointCloudLayer',
+      data: LAZ_URL,
+      onDataLoad,
+      opacity: 1.0, 
+      pointSize: 1.5, 
+      loaders: [LASLoader],
+      loadOptions: {
+        las: {
+          colorDepth: 'auto' 
+        }
+      },
+      getColor: (point) => point.color,
+    })
+  ];
 
   return (
     <div style={{ position: 'relative', height: '1000px', width: '100%', marginTop: '20px' }}>
