@@ -63,7 +63,7 @@ const LidarMapGL = () => {
         initialViewState={{
           longitude: longitude,
           latitude: latitude,
-          zoom: 15,
+          zoom: 11,
           pitch: 45,
           bearing: 0
         }}
