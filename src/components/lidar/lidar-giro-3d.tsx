@@ -2,17 +2,27 @@ import { useEffect, useRef } from 'react';
 import { LAZ_URL } from './config';
 import MapContainer from '../MapContainer';
 import Instance from '@giro3d/giro3d/core/Instance';
+import Extent from "@giro3d/giro3d/core/geographic/Extent.js";
+import Map from "@giro3d/giro3d/entities/Map.js";
 import PointCloud from '@giro3d/giro3d/entities/PointCloud';
 import LASSource from '@giro3d/giro3d/sources/LASSource';
+import TiledImageSource from "@giro3d/giro3d/sources/TiledImageSource.js";
+import { centerViewOnLocation } from '../../utils/giro-utils';
+import XYZ from 'ol/source/XYZ';
+import ColorLayer from "@giro3d/giro3d/core/layer/ColorLayer.js";
 import { setLazPerfPath, DEFAULT_LAZPERF_PATH } from '@giro3d/giro3d/sources/las/config';
 import { Vector3, MathUtils } from 'three';
 import { MapControls } from "three/examples/jsm/controls/MapControls.js";
+import 'ol/ol.css';
 
 interface LidarGiro3DProps {
   lazUrl?: string;
   lazPerfPath?: string;
   showInspector?: boolean;
 }
+
+const TAHITI_LAT = -8.85921;
+const TAHITI_LON = -140.16054;
 
 function placeCameraOnTop(volume: any, instance: Instance): void {
   if (!instance) {
@@ -27,7 +37,6 @@ function placeCameraOnTop(volume: any, instance: Instance): void {
 
   let altitude = 0;
   if ('fov' in camera && 'aspect' in camera) {
-    // PerspectiveCamera
     const fov = camera.fov;
     const aspect = camera.aspect;
     const hFov = MathUtils.degToRad(fov) / 2;
@@ -55,11 +64,9 @@ if (typeof window !== 'undefined') {
 const LidarGiro3D = ({ 
   lazUrl = LAZ_URL,
   lazPerfPath = DEFAULT_LAZPERF_PATH,
-  showInspector = true
 }: LidarGiro3DProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const instanceRef = useRef<Instance | null>(null);
-  const inspectorRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<Map | null>(null);
   
   useEffect(() => {
     if (lazPerfPath !== DEFAULT_LAZPERF_PATH) {
@@ -70,16 +77,59 @@ const LidarGiro3D = ({
   useEffect(() => {
     if (!mapContainer.current) return;
 
-    const instance = new Instance({
-      crs: 'EPSG:3857',
+    const extent = new Extent(
+      "EPSG:3857",
+      -20037508.34, 20037508.34, -20037508.34, 20037508.34
+    );
+
+    let instance = new Instance({
       target: mapContainer.current,
-      backgroundColor: null,
+      crs: extent.crs,
+      backgroundColor: 0x0a3b59,
+      renderer: {
+        antialias: true,
+        alpha: false,  
+        preserveDrawingBuffer: true
+      }
     });
 
-    instanceRef.current = instance;
+    const map = new Map({ extent });
+    instance.add(map);
 
-    const loadPointCloud = async () => {
+    let controls = new MapControls(instance.view.camera, instance.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.25;
+    controls.screenSpacePanning = true;
+    controls.zoomToCursor = true;
+    controls.update();
+    instance.view.setControls(controls);
+
+    const initializeMap = async () => {
       try {
+
+        const osmSource = new TiledImageSource({
+          source: new XYZ({
+            url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            crossOrigin: 'anonymous',
+          })
+        });
+
+        const osmLayer = new ColorLayer({
+          name: 'osm',
+          source: osmSource,
+          extent: map.extent,
+        });
+
+        await map.addLayer(osmLayer);
+        
+        centerViewOnLocation(
+          instance, 
+          controls, 
+          TAHITI_LON, 
+          TAHITI_LAT, 
+          10,
+        );
+
         const source = new LASSource({ url: lazUrl });
         const entity = new PointCloud({ source });
 
@@ -92,27 +142,17 @@ const LidarGiro3D = ({
       }
     };
 
-    loadPointCloud();
+    initializeMap();
+    mapRef.current = map;
 
     return () => {
-      if (instanceRef.current) {
-        instanceRef.current.dispose();
-        instanceRef.current = null;
+      if (instance) {
+        instance.dispose();
       }
     };
-  }, [lazUrl, showInspector]);
+  }, [lazUrl]);
 
-  return (
-    <>
-      <MapContainer ref={mapContainer} style={{ marginTop: '20px' }} />
-      {showInspector && (
-        <div 
-          ref={inspectorRef}
-          className="position-absolute top-0 start-0 mh-100 overflow-auto"
-        />
-      )}
-    </>
-  );
+  return <MapContainer ref={mapContainer} style={{ width: '100%', height: '100%', marginTop: '20px' }}/>;
 };
 
 export default LidarGiro3D;
