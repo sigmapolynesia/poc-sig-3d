@@ -21,8 +21,8 @@ interface LidarGiro3DProps {
   showInspector?: boolean;
 }
 
-const TAHITI_LAT = -8.85921;
-const TAHITI_LON = -140.16054;
+const NUKUHIVA_LAT = -8.85921;
+const NUKUHIVA_LON = -140.16054;
 
 function placeCameraOnTop(volume: any, instance: Instance): void {
   if (!instance) {
@@ -125,8 +125,8 @@ const LidarGiro3D = ({
         centerViewOnLocation(
           instance, 
           controls, 
-          TAHITI_LON, 
-          TAHITI_LAT, 
+          NUKUHIVA_LON, 
+          NUKUHIVA_LAT, 
           10,
         );
 
