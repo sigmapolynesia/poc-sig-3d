@@ -9,8 +9,8 @@ import { LAZ_URL } from './config.ts';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 const INITIAL_VIEW_STATE = {
-  longitude: -140.16054, 
-  latitude: -8.85921,  
+  longitude: -140.168868, 
+  latitude: -8.863563,  
   zoom: 11,
   pitch: 45,
   bearing: 0

@@ -21,8 +21,9 @@ interface LidarGiro3DProps {
   showInspector?: boolean;
 }
 
-const NUKUHIVA_LAT = -8.863563;
 const NUKUHIVA_LON = -140.168868;
+const NUKUHIVA_LAT = -8.863563;
+
 
 function placeCameraOnTop(volume: any, instance: Instance): void {
   if (!instance) {
