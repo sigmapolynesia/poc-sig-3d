@@ -3,12 +3,14 @@ import LidarMapGL from '../components/lidar/lidar-map-gl';
 import LidarGiro3D from '../components/lidar/lidar-giro-3d';
 import LidarCesiumJS from '../components/lidar/lidar-cesium-js';
 import LidarDeckGL from '../components/lidar/temporary-deckgl';
+import Proj from '../components/lidar/proj4';
 import { Tabs, Title, Text } from '@mantine/core';
 
 import MapLibreLogo from '../assets/maplibre.png';
 import Giro3DLogo from '../assets/giro3d.png';
 import CesiumLogo from '../assets/cesium.png';
 import DeckglLogo from '../assets/deckgl.png';
+import ProjLogo from '../assets/proj.png';
 
 
 const LidarView = () => {
@@ -33,6 +35,9 @@ const LidarView = () => {
           <Tabs.Tab value="deckgl">
             <img src={DeckglLogo} alt="Deckgl" style={{ height: '23px' }} />
           </Tabs.Tab>
+          <Tabs.Tab value="proj4">
+            <img src={ProjLogo} alt="Proj4" style={{ height: '30px' }} />
+          </Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="maplibre">
@@ -49,6 +54,10 @@ const LidarView = () => {
 
         <Tabs.Panel value="deckgl">
           <LidarDeckGL />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="proj4">
+          <Proj />
         </Tabs.Panel>
       </Tabs>
     </div>
