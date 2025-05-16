@@ -16,7 +16,7 @@ const INITIAL_VIEW_STATE: OrbitViewState = {
   zoom: 1 
 };
 
-const LidarMapGL = () => {
+const LidarDeckGL = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const [viewState, updateViewState] = useState<OrbitViewState>(INITIAL_VIEW_STATE);
 
@@ -65,4 +65,4 @@ const LidarMapGL = () => {
   );
 };
 
-export default LidarMapGL;
+export default LidarDeckGL;
