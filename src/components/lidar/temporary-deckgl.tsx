@@ -45,6 +45,7 @@ const LidarDeckGL = () => {
       loaders: [LASLoader],
       loadOptions: {
         las: {
+          fp64: true,
           colorDepth: 'auto' 
         }
       },

@@ -15,11 +15,17 @@ const INITIAL_VIEW_STATE = {
   pitch: 45,
   bearing: 0
 };
+
 function DeckGLOverlay(props: DeckProps) {
   const overlay = useControl<MapboxOverlay>(() => new MapboxOverlay(props));
   overlay.setProps(props);
   return null;
-}
+};
+
+type DataProps = {
+  position: [x: number, y: number, z: number];
+  color: [r: number, g: number, b: number];
+};
 
 const LidarMapGL = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -43,11 +49,13 @@ const LidarMapGL = () => {
       loaders: [LASLoader],
       loadOptions: {
         las: {
+          fp64: true,
           colorDepth: 'auto'
         }
       },
-      getColor: (point) => point.color,
-      getPosition: (point) => point.position,
+      getColor: (point: DataProps) => point.color,
+      getPosition: (point: DataProps) => point.position,
+      coordinateOrigin: [-140.168868, -8.863563, 967.059021],
       coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
     })
   ];
