@@ -45,7 +45,7 @@ const LidarMapGL = () => {
       data: LAZ_URL,
       onDataLoad,
       opacity: 1.0,
-      pointSize: 0.35,
+      pointSize: 1,
       loaders: [LASLoader],
       loadOptions: {
         las: {
@@ -55,7 +55,6 @@ const LidarMapGL = () => {
       },
       getColor: (point: DataProps) => point.color,
       getPosition: (point: DataProps) => point.position,
-      coordinateOrigin: [-140.168868, -8.863563, 967.059021],
       coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
     })
   ];

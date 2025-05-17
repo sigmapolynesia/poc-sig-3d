@@ -41,7 +41,7 @@ const LidarDeckGL = () => {
       data: LAZ_URL,
       onDataLoad,
       opacity: 1.0, 
-      pointSize: 1.5, 
+      pointSize: 1, 
       loaders: [LASLoader],
       loadOptions: {
         las: {
