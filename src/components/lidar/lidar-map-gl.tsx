@@ -11,8 +11,8 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 const INITIAL_VIEW_STATE = {
   longitude: -140.168868, 
   latitude: -8.863563,  
-  zoom: 11,
-  pitch: 45,
+  zoom: 14,
+  pitch: 0,
   bearing: 0
 };
 
@@ -24,7 +24,7 @@ function DeckGLOverlay(props: DeckProps) {
 
 type DataProps = {
   position: [x: number, y: number, z: number];
-  normal?: [x: number, y: number, z: number];
+  normal?: [nx: number, ny: number, nz: number];
   color: [r: number, g: number, b: number];
 };
 
@@ -64,7 +64,7 @@ const LidarMapGL = () => {
     <div style={{ position: 'relative', height: '1000px', width: '100%', marginTop: '20px' }} ref={mapContainer}>
       <Map
         initialViewState={INITIAL_VIEW_STATE}
-        mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+        mapStyle="https://api.maptiler.com/maps/streets-v2/style.json?key=oXKqIc8LHoao1mTqHfbp"
         style={{ width: '100%', height: '100%' }}
         terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }} 
       >
