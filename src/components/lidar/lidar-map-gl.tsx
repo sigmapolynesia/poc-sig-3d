@@ -24,6 +24,7 @@ function DeckGLOverlay(props: DeckProps) {
 
 type DataProps = {
   position: [x: number, y: number, z: number];
+  normal?: [x: number, y: number, z: number];
   color: [r: number, g: number, b: number];
 };
 
