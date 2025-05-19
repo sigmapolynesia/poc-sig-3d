@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { LAZ_URL } from './config';
+import { LAZ_URL } from './config-giro3d';
 import MapContainer from '../MapContainer';
 import Instance from '@giro3d/giro3d/core/Instance';
 import Extent from "@giro3d/giro3d/core/geographic/Extent.js";

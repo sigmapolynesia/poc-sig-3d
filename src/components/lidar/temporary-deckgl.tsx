@@ -4,7 +4,7 @@ import {LASLoader} from '@loaders.gl/las';
 import { PointCloudLayer } from '@deck.gl/layers';
 import { DeckGL } from '@deck.gl/react';
 import { OrbitView } from '@deck.gl/core';
-import { LAZ_URL } from './config.ts';
+import { LAZ_URL } from './config-deckgl';
 import type {OrbitViewState} from '@deck.gl/core';
 
 const INITIAL_VIEW_STATE: OrbitViewState = {

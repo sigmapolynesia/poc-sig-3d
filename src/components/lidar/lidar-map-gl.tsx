@@ -5,13 +5,13 @@ import { Map, useControl } from 'react-map-gl/maplibre';
 import { MapboxOverlay } from '@deck.gl/mapbox';
 import type { DeckProps } from '@deck.gl/core';
 import { COORDINATE_SYSTEM } from '@deck.gl/core';
-import { LAZ_URL } from './config.ts';
+import { LAZ_URL } from './config-deckgl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 const INITIAL_VIEW_STATE = {
   longitude: -140.168868, 
   latitude: -8.863563,  
-  zoom: 14,
+  zoom: 16,
   pitch: 0,
   bearing: 0
 };
@@ -45,8 +45,8 @@ const LidarMapGL = () => {
       id: 'LazPointCloudLayer',
       data: LAZ_URL,
       onDataLoad,
-      opacity: 1.0,
-      pointSize: 1,
+      opacity: 1,
+      pointSize: 0.2,
       loaders: [LASLoader],
       loadOptions: {
         las: {
@@ -56,7 +56,7 @@ const LidarMapGL = () => {
       },
       getColor: (point: DataProps) => point.color,
       getPosition: (point: DataProps) => point.position,
-      coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+      coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
     })
   ];
 

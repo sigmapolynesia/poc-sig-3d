@@ -1,0 +1,1 @@
+export const LAZ_URL = 'http://localhost:3000/assets/nkh_eboulement_diego_4326.laz'
