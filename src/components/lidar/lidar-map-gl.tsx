@@ -64,7 +64,7 @@ const LidarMapGL = () => {
     <div style={{ position: 'relative', height: '1000px', width: '100%', marginTop: '20px' }} ref={mapContainer}>
       <Map
         initialViewState={INITIAL_VIEW_STATE}
-        mapStyle="https://api.maptiler.com/maps/streets-v2/style.json?key=oXKqIc8LHoao1mTqHfbp"
+        mapStyle="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
         style={{ width: '100%', height: '100%' }}
         terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }} 
       >
