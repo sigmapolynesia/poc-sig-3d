@@ -1,0 +1,1 @@
+export const TILESET_URL = 'http://localhost:3000/assets/3857/tileset.json';
