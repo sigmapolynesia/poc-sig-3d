@@ -23,10 +23,6 @@ const DtilesCesiumJS = () => {
         })
       );
 
-      if (viewer.current.cesiumWidget.creditContainer) {
-        (viewer.current.cesiumWidget.creditContainer as HTMLElement).style.display = 'none';
-      }
-
       const loadTileset = async () => {
         try {
           if (viewer.current && TILESET_URL) {
