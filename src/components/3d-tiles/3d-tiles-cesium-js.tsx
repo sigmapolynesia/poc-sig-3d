@@ -34,6 +34,10 @@ const DtilesCesiumJS = () => {
               maximumScreenSpaceError: 16,
             });
 
+            tileset.style = new Cesium.Cesium3DTileStyle({
+              pointSize: '1.2',
+            });
+
             viewer.current.scene.primitives.add(tileset);
 
             if (viewer.current) {
