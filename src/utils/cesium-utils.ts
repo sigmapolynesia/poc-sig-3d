@@ -5,10 +5,12 @@ export const viewerOptions = {
   baseLayerPicker: false,
   geocoder: false,
   homeButton: false,
+  sceneModePicker: true,
   navigationHelpButton: false,
   animation: false,
   timeline: false,
-  fullscreenButton: false,
+  fullscreenButton: true,
+  vrButton: false,
   terrainProvider: new Cesium.EllipsoidTerrainProvider(),
 };
 

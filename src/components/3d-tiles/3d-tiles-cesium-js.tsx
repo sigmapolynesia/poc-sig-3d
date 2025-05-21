@@ -1,52 +1,43 @@
 import { useEffect, useRef } from 'react';
 import * as Cesium from 'cesium';
-import '../styles.css';
 import MapContainer from '../MapContainer';
 import { TILESET_URL } from './config';
+import { viewerOptions } from '../../utils/cesium-utils';
 
 const DtilesCesiumJS = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const viewerRef = useRef<Cesium.Viewer | null>(null);
+  const viewer = useRef<Cesium.Viewer | null>(null);
 
   useEffect(() => {
-    if (mapContainer.current && !viewerRef.current) {
-      Cesium.Ion.defaultAccessToken = '';
+    if (mapContainer.current && !viewer.current) {
       
-      viewerRef.current = new Cesium.Viewer(mapContainer.current, {
-        baseLayerPicker: false,
-        geocoder: false,
-        homeButton: true,
-        sceneModePicker: true,
-        navigationHelpButton: false,
-        animation: false,
-        timeline: false,
-        fullscreenButton: true,
-        vrButton: false,
-        terrainProvider: new Cesium.EllipsoidTerrainProvider()
+      viewer.current = new Cesium.Viewer(mapContainer.current, {
+        ...viewerOptions,
       });
 
-      viewerRef.current.imageryLayers.removeAll();
-      viewerRef.current.imageryLayers.addImageryProvider(
+      viewer.current.imageryLayers.removeAll();
+      
+      viewer.current.imageryLayers.addImageryProvider(
         new Cesium.OpenStreetMapImageryProvider({
           url: 'https://a.tile.openstreetmap.org/'
         })
       );
 
-      if (viewerRef.current.cesiumWidget.creditContainer) {
-        (viewerRef.current.cesiumWidget.creditContainer as HTMLElement).style.display = 'none';
+      if (viewer.current.cesiumWidget.creditContainer) {
+        (viewer.current.cesiumWidget.creditContainer as HTMLElement).style.display = 'none';
       }
 
       const loadTileset = async () => {
         try {
-          if (viewerRef.current && TILESET_URL) {
+          if (viewer.current && TILESET_URL) {
             const tileset = await Cesium.Cesium3DTileset.fromUrl(TILESET_URL, {
               maximumScreenSpaceError: 16,
             });
 
-            viewerRef.current.scene.primitives.add(tileset);
+            viewer.current.scene.primitives.add(tileset);
 
-            if (viewerRef.current) {
-              viewerRef.current.zoomTo(tileset);
+            if (viewer.current) {
+              viewer.current.zoomTo(tileset);
             }
 
             tileset.tileFailed.addEventListener((error: any) => {
@@ -64,9 +55,9 @@ const DtilesCesiumJS = () => {
     }
 
     return () => {
-      if (viewerRef.current) {
-        viewerRef.current.destroy();
-        viewerRef.current = null;
+      if (viewer.current) {
+        viewer.current.destroy();
+        viewer.current = null;
       }
     };
   }, []);
