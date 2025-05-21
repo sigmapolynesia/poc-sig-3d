@@ -9,8 +9,7 @@ import TiledImageSource from "@giro3d/giro3d/sources/TiledImageSource.js";
 import { centerViewOnLocation } from '../../utils/giro-utils';
 import XYZ from 'ol/source/XYZ';
 import ColorLayer from "@giro3d/giro3d/core/layer/ColorLayer.js";
-import { setLazPerfPath, DEFAULT_LAZPERF_PATH } from '@giro3d/giro3d/sources/las/config';
-import { Vector3, MathUtils } from 'three';
+import { Vector3, Vector3Like } from 'three';
 import { MapControls } from "three/examples/jsm/controls/MapControls.js";
 import 'ol/ol.css';
 
@@ -23,56 +22,11 @@ interface LidarGiro3DProps {
 const NUKUHIVA_LON = -140.168868;
 const NUKUHIVA_LAT = -8.863563;
 
-
-function placeCameraOnTop(volume: any, instance: Instance): void {
-  if (!instance) {
-    return;
-  }
-
-  const center = volume.getCenter(new Vector3());
-  const size = volume.getSize(new Vector3());
-
-  const camera = instance.view.camera;
-  const top = volume.max.z;
-
-  let altitude = 0;
-  if ('fov' in camera && 'aspect' in camera) {
-    const fov = camera.fov;
-    const aspect = camera.aspect;
-    const hFov = MathUtils.degToRad(fov) / 2;
-    altitude = (Math.max(size.x / aspect, size.y) / Math.tan(hFov)) * 0.5;
-  } else if ('top' in camera && 'bottom' in camera && 'left' in camera && 'right' in camera) {
-    altitude = size.z * 2; 
-  }
-
-  instance.view.camera.position.set(center.x, center.y - 1, altitude + top);
-  instance.view.camera.lookAt(center);
-
-  const controls = new MapControls(instance.view.camera, instance.domElement);
-  controls.target.copy(center);
-  controls.enableDamping = true;
-  controls.dampingFactor = 0.25;
-
-  instance.view.setControls(controls);
-  instance.notifyChange(instance.view.camera);
-}
-
-if (typeof window !== 'undefined') {
-  setLazPerfPath(DEFAULT_LAZPERF_PATH);
-}
-
 const LidarGiro3D = ({ 
   tilesetUrl = TILESET_URL,
-  lazPerfPath = DEFAULT_LAZPERF_PATH,
 }: LidarGiro3DProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map | null>(null);
-  
-  useEffect(() => {
-    if (lazPerfPath !== DEFAULT_LAZPERF_PATH) {
-      setLazPerfPath(lazPerfPath);
-    }
-  }, [lazPerfPath]);
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -86,11 +40,6 @@ const LidarGiro3D = ({
       target: mapContainer.current,
       crs: extent.crs,
       backgroundColor: 0x0a3b59,
-      renderer: {
-        antialias: true,
-        alpha: false,  
-        preserveDrawingBuffer: true
-      }
     });
 
     const map = new Map({ extent });
@@ -104,51 +53,82 @@ const LidarGiro3D = ({
     controls.update();
     instance.view.setControls(controls);
 
-    const initializeMap = async () => {
-      try {
+    const initializeMap = () => {
+    try {
+      const osmSource = new TiledImageSource({
+        source: new XYZ({
+          url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+          crossOrigin: 'anonymous',
+        })
+      });
 
-        const osmSource = new TiledImageSource({
-          source: new XYZ({
-            url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-            crossOrigin: 'anonymous',
-          })
+      const osmLayer = new ColorLayer({
+        name: 'osm',
+        source: osmSource,
+        extent: map.extent,
+      });
+
+      map.addLayer(osmLayer).then(() => {
+          centerViewOnLocation(
+            instance, 
+            controls, 
+            NUKUHIVA_LON, 
+            NUKUHIVA_LAT, 
+            10,
+          );
+          
+        const pointcloud = new Tiles3D({ url: tilesetUrl });
+
+        function placeCamera(position: Vector3, lookAt: Vector3Like) {
+          instance.view.camera.position.set(position.x, position.y, position.z);
+          const lookAtVec3 = (lookAt instanceof Vector3) ? lookAt : new Vector3(lookAt.x, lookAt.y, lookAt.z);
+          instance.view.camera.lookAt(lookAtVec3);
+
+          const controls = new MapControls(instance.view.camera, instance.domElement);
+          controls.target.copy(lookAtVec3);
+          controls.enableDamping = true;
+          controls.dampingFactor = 0.25;
+          instance.view.setControls(controls);
+
+          instance.notifyChange(instance.view.camera);
+        }
+
+        function initializeCamera() {
+          const bbox = pointcloud.getBoundingBox();
+
+          if (bbox) {
+            instance.view.camera.far = 2.0 * bbox.getSize(new Vector3()).length();
+
+            const ratio = bbox.getSize(new Vector3()).x / bbox.getSize(new Vector3()).z;
+            const position = bbox.min
+              .clone()
+              .add(bbox.getSize(new Vector3()).multiply(new Vector3(0, 0, ratio * 0.5)));
+            const lookAt = bbox.getCenter(new Vector3());
+            lookAt.z = bbox.min.z;
+            placeCamera(position, lookAt);
+          } else {
+            console.warn('La boîte englobante est null ou undefined');
+          }
+        }
+
+        instance.add(pointcloud).then(() => {
+          initializeCamera();
         });
+      });
+    } catch (error) {
+      console.error('Erreur lors de l\'initialisation de la carte :', error);
+    }
+  };
 
-        const osmLayer = new ColorLayer({
-          name: 'osm',
-          source: osmSource,
-          extent: map.extent,
-        });
+  initializeMap();
+  mapRef.current = map;
 
-        await map.addLayer(osmLayer);
-        
-        centerViewOnLocation(
-          instance, 
-          controls, 
-          NUKUHIVA_LON, 
-          NUKUHIVA_LAT, 
-          10,
-        );
-
-        const entity = new Tiles3D({ url: tilesetUrl });
-
-        await instance.add(entity);
-        
-        placeCameraOnTop(entity.getBoundingBox(), instance);
-      } catch (error) {
-        console.error('Erreur lors du chargement du nuage de points:', error);
-      }
-    };
-
-    initializeMap();
-    mapRef.current = map;
-
-    return () => {
-      if (instance) {
-        instance.dispose();
-      }
-    };
-  }, [tilesetUrl]);
+  return () => {
+    if (instance) {
+      instance.dispose();
+    }
+  };
+}, [tilesetUrl]);
 
   return <MapContainer ref={mapContainer} style={{ width: '100%', height: '100%', marginTop: '20px' }}/>;
 };
