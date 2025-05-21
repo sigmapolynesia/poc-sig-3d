@@ -9,11 +9,11 @@ import TiledImageSource from "@giro3d/giro3d/sources/TiledImageSource.js";
 import { centerViewOnLocation } from '../../utils/giro-utils';
 import XYZ from 'ol/source/XYZ';
 import ColorLayer from "@giro3d/giro3d/core/layer/ColorLayer.js";
-import { Vector3, Vector3Like } from 'three';
+import { MathUtils, Vector3 } from 'three';
 import { MapControls } from "three/examples/jsm/controls/MapControls.js";
 import 'ol/ol.css';
 
-interface LidarGiro3DProps {
+interface DTilesGiro3DProps {
   tilesetUrl?: string;
   lazPerfPath?: string;
   showInspector?: boolean;
@@ -22,9 +22,43 @@ interface LidarGiro3DProps {
 const NUKUHIVA_LON = -140.168868;
 const NUKUHIVA_LAT = -8.863563;
 
-const LidarGiro3D = ({ 
+
+function placeCameraOnTop(volume: any, instance: Instance): void {
+  if (!instance) {
+    return;
+  }
+
+  const center = volume.getCenter(new Vector3());
+  const size = volume.getSize(new Vector3());
+
+  const camera = instance.view.camera;
+  const top = volume.max.z;
+
+  let altitude = 0;
+  if ('fov' in camera && 'aspect' in camera) {
+    const fov = camera.fov;
+    const aspect = camera.aspect;
+    const hFov = MathUtils.degToRad(fov) / 2;
+    altitude = (Math.max(size.x / aspect, size.y) / Math.tan(hFov)) * 0.5;
+  } else if ('top' in camera && 'bottom' in camera && 'left' in camera && 'right' in camera) {
+    altitude = size.z * 2; 
+  }
+
+  instance.view.camera.position.set(center.x, center.y - 1, altitude + top);
+  instance.view.camera.lookAt(center);
+
+  const controls = new MapControls(instance.view.camera, instance.domElement);
+  controls.target.copy(center);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.25;
+
+  instance.view.setControls(controls);
+  instance.notifyChange(instance.view.camera);
+}
+
+const DTilesGiro3D = ({ 
   tilesetUrl = TILESET_URL,
-}: LidarGiro3DProps) => {
+}: DTilesGiro3DProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map | null>(null);
 
@@ -53,7 +87,7 @@ const LidarGiro3D = ({
     controls.update();
     instance.view.setControls(controls);
 
-    const initializeMap = () => {
+  const initializeMap = async () => {
     try {
       const osmSource = new TiledImageSource({
         source: new XYZ({
@@ -68,53 +102,24 @@ const LidarGiro3D = ({
         extent: map.extent,
       });
 
-      map.addLayer(osmLayer).then(() => {
-          centerViewOnLocation(
-            instance, 
-            controls, 
-            NUKUHIVA_LON, 
-            NUKUHIVA_LAT, 
-            10,
-          );
-          
-        const pointcloud = new Tiles3D({ url: tilesetUrl });
+      await map.addLayer(osmLayer);
+      
+      centerViewOnLocation(
+        instance, 
+        controls, 
+        NUKUHIVA_LON, 
+        NUKUHIVA_LAT, 
+        10,
+      );
 
-        function placeCamera(position: Vector3, lookAt: Vector3Like) {
-          instance.view.camera.position.set(position.x, position.y, position.z);
-          const lookAtVec3 = (lookAt instanceof Vector3) ? lookAt : new Vector3(lookAt.x, lookAt.y, lookAt.z);
-          instance.view.camera.lookAt(lookAtVec3);
-
-          const controls = new MapControls(instance.view.camera, instance.domElement);
-          controls.target.copy(lookAtVec3);
-          controls.enableDamping = true;
-          controls.dampingFactor = 0.25;
-          instance.view.setControls(controls);
-
-          instance.notifyChange(instance.view.camera);
-        }
-
-        function initializeCamera() {
-          const bbox = pointcloud.getBoundingBox();
-
-          if (bbox) {
-            instance.view.camera.far = 2.0 * bbox.getSize(new Vector3()).length();
-
-            const ratio = bbox.getSize(new Vector3()).x / bbox.getSize(new Vector3()).z;
-            const position = bbox.min
-              .clone()
-              .add(bbox.getSize(new Vector3()).multiply(new Vector3(0, 0, ratio * 0.5)));
-            const lookAt = bbox.getCenter(new Vector3());
-            lookAt.z = bbox.min.z;
-            placeCamera(position, lookAt);
-          } else {
-            console.warn('La boîte englobante est null ou undefined');
-          }
-        }
-
-        instance.add(pointcloud).then(() => {
-          initializeCamera();
-        });
+      const pointcloud = new Tiles3D({
+        url: tilesetUrl,
+        errorTarget: 15,
       });
+
+      await instance.add(pointcloud);
+
+      placeCameraOnTop(pointcloud.getBoundingBox(), instance);
     } catch (error) {
       console.error('Erreur lors de l\'initialisation de la carte :', error);
     }
@@ -133,4 +138,4 @@ const LidarGiro3D = ({
   return <MapContainer ref={mapContainer} style={{ width: '100%', height: '100%', marginTop: '20px' }}/>;
 };
 
-export default LidarGiro3D;
+export default DTilesGiro3D;
