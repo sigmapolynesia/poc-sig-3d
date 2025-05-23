@@ -1,1 +1,1 @@
-export const DEM_URL = 'http://localhost:3000/assets/tiles/tiles.json';
+export const DEM_URL = 'http://localhost:3000/assets/output_file/tiles.json';
