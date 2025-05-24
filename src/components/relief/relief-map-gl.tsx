@@ -76,7 +76,7 @@ const ReliefMapGL: React.FC<DEMMapGLProps> = ({
 
         map.setTerrain({
           source: "terrain",
-          exaggeration: 0.0
+          exaggeration: 0.01
         });
       });
 
