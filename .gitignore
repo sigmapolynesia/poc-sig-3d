@@ -29,8 +29,5 @@ dist-ssr
 .env.test.local
 .env.production.local
 
-public/assets/tiles
-public/assets/output_file
-public/assets/nkh_tiles
 public/assets/nkh_rgb_tiles
 public/assets/nkh_lis_rgb_tiles
