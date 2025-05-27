@@ -11,7 +11,7 @@ interface DEMMapGLProps {
 }
 
 const ReliefMapGL: React.FC<DEMMapGLProps> = ({
-    center = [-140.168868, -8.863563],
+    center = [-140.1289, -8.8732],
     zoom = 12,
   }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -71,7 +71,7 @@ const ReliefMapGL: React.FC<DEMMapGLProps> = ({
             'hillshade-accent-color': '#8B7355',
             'hillshade-illumination-direction': 315,
             'hillshade-illumination-anchor': 'viewport',
-            'hillshade-exaggeration': 0.35
+            'hillshade-exaggeration': 0.2
           }
         });
 
