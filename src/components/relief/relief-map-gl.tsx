@@ -71,7 +71,7 @@ const ReliefMapGL: React.FC<DEMMapGLProps> = ({
             'hillshade-accent-color': '#8B7355',
             'hillshade-illumination-direction': 315,
             'hillshade-illumination-anchor': 'viewport',
-            'hillshade-exaggeration': 0.2
+            'hillshade-exaggeration': 0.35
           }
         });
 
