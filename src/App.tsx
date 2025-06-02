@@ -10,10 +10,11 @@ import GeojsonView from './views/geojson';
 import MVTView from './views/mvt';
 import LidarView from './views/lidar';
 import DtilesView from './views/3d-tiles';
+import ModelsView from './views/3d-models';
 import logoSigma from './assets/logosigma.png';
 import React from 'react';
 
-type ViewType = 'globe' | 'wmts' | 'relief' | 'geojson' | 'mvt' | 'lidar' | '3d-tiles';
+type ViewType = 'globe' | 'wmts' | 'relief' | 'geojson' | 'mvt' | 'lidar' | '3d-tiles' | '3d-models';
 
 interface NavItem {
   id: ViewType;
@@ -30,6 +31,7 @@ function App() {
     { id: 'mvt', label: 'MVT', component: MVTView },
     { id: 'lidar', label: 'LIDAR', component: LidarView },
     { id: '3d-tiles', label: '3D Tiles', component: DtilesView },
+    { id: '3d-models', label: 'Modèles 3D', component: ModelsView },
     { id: 'globe', label: 'Globe', component: Globe, props: { height: '1000px' } }
   ];
 
