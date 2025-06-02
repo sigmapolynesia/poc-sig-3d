@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import DtilesMapGL from '../components/3d-tiles/3d-tiles-map-gl';
-import DtilesGiro3D from '../components/3d-tiles/3d-tiles-giro-3d';
+import Model3DMapGL from '../components/3d-models/3d-models-map-gl';
+import Model3DGiro3D from '../components/3d-models/3d-models-giro-3d';
 import { Tabs, Title, Text } from '@mantine/core';
 
 import MapLibreLogo from '../assets/maplibre.png';
@@ -11,8 +11,8 @@ const ModelsView = () => {
 
   return (
     <div className="3d-tiles-container">
-      <Title order={1} ta="left" mb={20}>3D Tiles</Title>
-      <Text ta="left" mb={20}>Visualisation de 3D Tiles dans les différentes solutions 3D Web choisies.</Text>
+      <Title order={1} ta="left" mb={20}>3D Models</Title>
+      <Text ta="left" mb={20}>Visualisation de modèles 3D dans les différentes solutions 3D Web choisies.</Text>
       
       <Tabs keepMounted={false} value={activeTab} onChange={(value) => setActiveTab(value || 'maplibre')}>
         <Tabs.List>
@@ -25,11 +25,11 @@ const ModelsView = () => {
         </Tabs.List>
 
         <Tabs.Panel value="maplibre">
-          <DtilesMapGL />
+          <Model3DMapGL />
         </Tabs.Panel>
 
         <Tabs.Panel value="giro3d">
-          <DtilesGiro3D />
+          <Model3DGiro3D />
         </Tabs.Panel>
       </Tabs>
     </div>

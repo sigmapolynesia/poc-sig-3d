@@ -31,7 +31,7 @@ function App() {
     { id: 'mvt', label: 'MVT', component: MVTView },
     { id: 'lidar', label: 'LIDAR', component: LidarView },
     { id: '3d-tiles', label: '3D Tiles', component: DtilesView },
-    { id: '3d-models', label: 'Modèles 3D', component: ModelsView },
+    { id: '3d-models', label: '3D Models', component: ModelsView },
     { id: 'globe', label: 'Globe', component: Globe, props: { height: '1000px' } }
   ];
 
