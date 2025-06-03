@@ -1,0 +1,27 @@
+{
+  "tilejson": "3.0.0",
+  "name": "mnt-marq-nkh",
+  "version": "1.0.0",
+  "scheme": "xyz",
+  "tiles": [
+    "http://localhost:3000/assets/test_output/tiles/{z}/{x}/{y}.png"
+  ],
+  "minzoom": 0,
+  "maxzoom": 12,
+  "bounds": [
+    -140.25225183652563,
+    -8.965881565781213,
+    -140.00555525044874,
+    -8.780491457854948
+  ],
+  "center": [
+    -140.12890354348718,
+    -8.87318651181808,
+    0
+  ],
+  "format": "png",
+  "attribution": "Generated with rgb-weaver",
+  "description": "Terrain RGB tiles generated from DEM",
+  "encoding": "mapbox",
+  "tileSize": 512
+}
