@@ -6,7 +6,19 @@ import '../styles.css';
 import MapContainer from '../MapContainer';
 import { GLTF_URL } from './config';
 
-const Model3DMapGL = () => {
+const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY;
+
+interface Model3DMapGLProps {
+  center?: [number, number];
+    zoom?: number;
+    apiKey?: string;
+}
+
+const Model3DMapGL : React.FC<Model3DMapGLProps> = ({
+    center = [-140.168868, -8.863563],
+    zoom = 15,
+    apiKey = MAPTILER_KEY
+}) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map | null>(null);
 
@@ -15,10 +27,9 @@ const Model3DMapGL = () => {
 
     const map = new maplibregl.Map({
       container: mapContainer.current,
-      style:
-        'https://api.maptiler.com/maps/basic/style.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL',
-      zoom: 15,
-      center: [-140.168868, -8.863563],
+      style: `https://api.maptiler.com/maps/streets/style.json?key=${apiKey}`,
+      center: center,
+      zoom: zoom,
       pitch: 30,
       canvasContextAttributes: { antialias: true },
     });
