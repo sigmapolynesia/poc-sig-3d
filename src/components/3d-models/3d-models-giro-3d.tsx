@@ -4,6 +4,11 @@ import { MapControls } from "three/examples/jsm/controls/MapControls.js";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import Instance from "@giro3d/giro3d/core/Instance.js";
 import Extent from "@giro3d/giro3d/core/geographic/Extent.js";
+import Map from "@giro3d/giro3d/entities/Map.js";
+import TiledImageSource from "@giro3d/giro3d/sources/TiledImageSource.js";
+import ColorLayer from "@giro3d/giro3d/core/layer/ColorLayer.js";
+import XYZ from 'ol/source/XYZ';
+import { transform } from 'ol/proj';
 import MapContainer from '../MapContainer';
 import { GLTF_URL } from './config';
 
@@ -16,7 +21,7 @@ interface Model3DGiro3DProps {
 
 const Model3DGiro3D: React.FC<Model3DGiro3DProps> = ({
   modelUrl = GLTF_URL,
-  modelPosition = [0, 0, 0],
+  modelPosition = [-140.168868, -8.863563, 0], 
   modelRotation = [Math.PI / 2, 0, 0],
   modelScale = 1
 }) => {
@@ -34,7 +39,7 @@ const Model3DGiro3D: React.FC<Model3DGiro3DProps> = ({
 
         const extent = new Extent(
           "EPSG:3857",
-          -1000000, 1000000, -1000000, 1000000
+          -20037508.34, 20037508.34, -20037508.34, 20037508.34
         );
 
         instance = new Instance({
@@ -53,6 +58,33 @@ const Model3DGiro3D: React.FC<Model3DGiro3DProps> = ({
 
         if (isDestroyed) return;
         instanceRef.current = instance;
+
+        const map = new Map({ extent });
+        instance.add(map);
+
+        const osmSource = new TiledImageSource({
+          source: new XYZ({
+            url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            crossOrigin: 'anonymous',
+          })
+        });
+
+        const osmLayer = new ColorLayer({
+          name: 'osm',
+          source: osmSource,
+          extent: map.extent,
+        });
+
+        await map.addLayer(osmLayer);
+
+        const [mercatorX, mercatorY] = transform(
+          [modelPosition[0], modelPosition[1]], 
+          'EPSG:4326', 
+          'EPSG:3857'
+        );
+        
+        console.log('Coordonnées GPS:', modelPosition[0], modelPosition[1]);
+        console.log('Coordonnées Mercator:', mercatorX, mercatorY);
 
         const controls = new MapControls(instance.view.camera, instance.domElement);
         controls.enableDamping = true;
@@ -96,13 +128,12 @@ const Model3DGiro3D: React.FC<Model3DGiro3DProps> = ({
               });
 
               const box = new Box3().setFromObject(model);
-              const center = box.getCenter(new Vector3());
               const size = box.getSize(new Vector3());
 
               model.position.set(
-                modelPosition[0] - center.x,
-                modelPosition[1] - center.y,
-                modelPosition[2] - center.z
+                mercatorX,
+                mercatorY,
+                modelPosition[2]
               );
 
               model.rotation.set(modelRotation[0], modelRotation[1], modelRotation[2]);
@@ -112,15 +143,15 @@ const Model3DGiro3D: React.FC<Model3DGiro3DProps> = ({
               instance.add(model);
 
               const maxDim = Math.max(size.x, size.y, size.z) * modelScale;
-              const distance = Math.max(maxDim * 2, 5);
+              const distance = Math.max(maxDim * 10, 500); 
               
               instance.view.camera.position.set(
-                modelPosition[0] + distance,
-                modelPosition[1] + distance,
-                modelPosition[2] + distance/2
+                mercatorX + distance * 0.5,
+                mercatorY + distance * 0.5,
+                distance * 0.8
               );
               
-              const lookAtPoint = new Vector3(modelPosition[0], modelPosition[1], modelPosition[2]);
+              const lookAtPoint = new Vector3(mercatorX, mercatorY, modelPosition[2]);
               instance.view.camera.lookAt(lookAtPoint);
               controls.target.copy(lookAtPoint);
               controls.update();
@@ -130,7 +161,7 @@ const Model3DGiro3D: React.FC<Model3DGiro3DProps> = ({
               }
               
             } catch (error) {
-              console.error('Erreur lors du traitement du modèle:', error);
+              console.error('Erreur lors du chargement du modèle:', error);
             }
           },
         );
@@ -159,6 +190,7 @@ const Model3DGiro3D: React.FC<Model3DGiro3DProps> = ({
       }
     };
   }, [modelUrl]);
+
   return (
       <MapContainer ref={mapContainer} style={{ marginTop: '20px' }} />
   );
