@@ -1,133 +1,167 @@
 import { useEffect, useRef } from 'react';
-import maplibregl, { Map, MercatorCoordinate, CustomLayerInterface } from 'maplibre-gl';
-import * as THREE from 'three';
+import { HemisphereLight, Mesh, MeshStandardMaterial, Vector3, Box3 } from "three";
+import { MapControls } from "three/examples/jsm/controls/MapControls.js";
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import '../styles.css';
+import Instance from "@giro3d/giro3d/core/Instance.js";
+import Extent from "@giro3d/giro3d/core/geographic/Extent.js";
 import MapContainer from '../MapContainer';
+import { GLTF_URL } from './config';
 
-const Model3DGiro3D = () => {
+interface Model3DGiro3DProps {
+  modelUrl?: string;
+  modelPosition?: [number, number, number];
+  modelRotation?: [number, number, number];
+  modelScale?: number;
+}
+
+const Model3DGiro3D: React.FC<Model3DGiro3DProps> = ({
+  modelUrl = GLTF_URL,
+  modelPosition = [0, 0, 0],
+  modelRotation = [Math.PI / 2, 0, 0],
+  modelScale = 1
+}) => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<Map | null>(null);
+  const instanceRef = useRef<Instance | null>(null);
 
   useEffect(() => {
-    if (!mapContainer.current || mapRef.current) return;
+    if (!mapContainer.current) return;
 
-    const map = new maplibregl.Map({
-      container: mapContainer.current,
-      style:
-        'https://api.maptiler.com/maps/basic/style.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL',
-      zoom: 18,
-      center: [148.9819, -35.3981],
-      pitch: 60,
-      canvasContextAttributes: { antialias: true },
-    });
+    let instance: Instance | null = null;
+    let isDestroyed = false;
 
-    mapRef.current = map;
+    const initializeScene = async () => {
+      try {
 
-    const modelOrigin: [number, number] = [148.9819, -35.39847];
-    const modelAltitude = 0;
-    const modelRotate: [number, number, number] = [Math.PI / 2, 0, 0];
+        const extent = new Extent(
+          "EPSG:3857",
+          -1000000, 1000000, -1000000, 1000000
+        );
 
-    const modelAsMercatorCoordinate = MercatorCoordinate.fromLngLat(
-      modelOrigin,
-      modelAltitude
-    );
+        instance = new Instance({
+          target: mapContainer.current!,
+          crs: extent.crs,
+          backgroundColor: 0x87CEEB,
+          renderer: {
+            antialias: false, 
+            alpha: false,
+            preserveDrawingBuffer: false, 
+            powerPreference: "default",
+            stencil: false,
+            depth: true
+          }
+        });
 
-    const modelTransform = {
-      translateX: modelAsMercatorCoordinate.x,
-      translateY: modelAsMercatorCoordinate.y,
-      translateZ: modelAsMercatorCoordinate.z,
-      rotateX: modelRotate[0],
-      rotateY: modelRotate[1],
-      rotateZ: modelRotate[2],
-      scale: modelAsMercatorCoordinate.meterInMercatorCoordinateUnits(),
-    };
+        if (isDestroyed) return;
+        instanceRef.current = instance;
 
-    const customLayer: CustomLayerInterface = {
-      id: '3d-model',
-      type: 'custom',
-      renderingMode: '3d',
-      onAdd(map, gl) {
-        const scene = new THREE.Scene();
-        const camera = new THREE.Camera();
+        const controls = new MapControls(instance.view.camera, instance.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.1;
+        controls.screenSpacePanning = true;
+        controls.zoomToCursor = true;
+        instance.view.setControls(controls);
 
-        const light1 = new THREE.DirectionalLight(0xffffff);
-        light1.position.set(0, -70, 100).normalize();
-        scene.add(light1);
+        const ambientLight = new HemisphereLight(0xffffff, 0x444444, 4);
+        instance.scene.add(ambientLight);
 
-        const light2 = new THREE.DirectionalLight(0xffffff);
-        light2.position.set(0, 70, 100).normalize();
-        scene.add(light2);
+        instance.renderer.shadowMap.enabled = false;
 
         const loader = new GLTFLoader();
+        
         loader.load(
-          'https://maplibre.org/maplibre-gl-js/docs/assets/34M_17/34M_17.gltf',
+          modelUrl,
           (gltf) => {
-            scene.add(gltf.scene);
-          }
+            if (isDestroyed || !instance) return;
+
+            try {
+              const model = gltf.scene;
+              
+              model.traverse((child) => {
+                if (child instanceof Mesh) {
+                  child.castShadow = false;
+                  child.receiveShadow = false;
+                  
+                  if (child.material) {
+                    if (Array.isArray(child.material)) {
+                      child.material.forEach(mat => {
+                        if (mat instanceof MeshStandardMaterial) {
+                          mat.needsUpdate = true;
+                        }
+                      });
+                    } else if (child.material instanceof MeshStandardMaterial) {
+                      child.material.needsUpdate = true;
+                    }
+                  }
+                }
+              });
+
+              const box = new Box3().setFromObject(model);
+              const center = box.getCenter(new Vector3());
+              const size = box.getSize(new Vector3());
+
+              model.position.set(
+                modelPosition[0] - center.x,
+                modelPosition[1] - center.y,
+                modelPosition[2] - center.z
+              );
+
+              model.rotation.set(modelRotation[0], modelRotation[1], modelRotation[2]);
+              model.scale.setScalar(modelScale);
+              model.updateMatrixWorld(true);
+
+              instance.add(model);
+
+              const maxDim = Math.max(size.x, size.y, size.z) * modelScale;
+              const distance = Math.max(maxDim * 2, 5);
+              
+              instance.view.camera.position.set(
+                modelPosition[0] + distance,
+                modelPosition[1] + distance,
+                modelPosition[2] + distance/2
+              );
+              
+              const lookAtPoint = new Vector3(modelPosition[0], modelPosition[1], modelPosition[2]);
+              instance.view.camera.lookAt(lookAtPoint);
+              controls.target.copy(lookAtPoint);
+              controls.update();
+              
+              if (instance) {
+                instance.notifyChange();
+              }
+              
+            } catch (error) {
+              console.error('Erreur lors du traitement du modèle:', error);
+            }
+          },
         );
 
-        const renderer = new THREE.WebGLRenderer({
-          canvas: map.getCanvas(),
-          context: gl,
-          antialias: true,
-        });
-        renderer.autoClear = false;
-
-        (this as any).scene = scene;
-        (this as any).camera = camera;
-        (this as any).renderer = renderer;
-      },
-      render(_gl, matrix) {
-        const rotationX = new THREE.Matrix4().makeRotationAxis(
-          new THREE.Vector3(1, 0, 0),
-          modelTransform.rotateX
-        );
-        const rotationY = new THREE.Matrix4().makeRotationAxis(
-          new THREE.Vector3(0, 1, 0),
-          modelTransform.rotateY
-        );
-        const rotationZ = new THREE.Matrix4().makeRotationAxis(
-          new THREE.Vector3(0, 0, 1),
-          modelTransform.rotateZ
-        );
-
-        const m = new THREE.Matrix4().fromArray(matrix.defaultProjectionData.mainMatrix);
-        const l = new THREE.Matrix4()
-          .makeTranslation(
-            modelTransform.translateX,
-            modelTransform.translateY,
-            modelTransform.translateZ
-          )
-          .scale(
-            new THREE.Vector3(
-              modelTransform.scale,
-              -modelTransform.scale,
-              modelTransform.scale
-            )
-          )
-          .multiply(rotationX)
-          .multiply(rotationY)
-          .multiply(rotationZ);
-
-        (this as any).camera.projectionMatrix = m.multiply(l);
-        (this as any).renderer.resetState();
-        (this as any).renderer.render((this as any).scene, (this as any).camera);
-        map.triggerRepaint();
-      },
+      } catch (error) {
+        console.error('Erreur d\'initialisation:', error);
+      }
     };
 
-    map.on('style.load', () => {
-      map.addLayer(customLayer);
-    });
+    const timer = setTimeout(initializeScene, 100);
 
     return () => {
-      map.remove();
-      mapRef.current = null;
+      isDestroyed = true;
+      clearTimeout(timer);
+      
+      if (instance) {
+        try {
+          if (instance.renderer) {
+            instance.renderer.dispose();
+          }
+          instance.dispose();
+        } catch (error) {
+          console.warn('Erreur lors du nettoyage:', error);
+        }
+        instanceRef.current = null;
+      }
     };
-  }, []);
-
-  return <MapContainer ref={mapContainer} style={{ marginTop: '20px' }} />;
+  }, [modelUrl]);
+  return (
+      <MapContainer ref={mapContainer} style={{ marginTop: '20px' }} />
+  );
 };
 
 export default Model3DGiro3D;
