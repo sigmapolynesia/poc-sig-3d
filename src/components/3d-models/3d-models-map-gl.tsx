@@ -64,7 +64,7 @@ const Model3DMapGL : React.FC<Model3DMapGLProps> = ({
         const camera = new THREE.Camera();
 
         const light1 = new THREE.DirectionalLight(0xffffff, 4);
-        light1.position.set(0, 180, 100).normalize();
+        light1.position.set(180, 180, 100).normalize();
         scene.add(light1);
 
         // const light2 = new THREE.DirectionalLight(0xffffff, 4);
