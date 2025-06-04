@@ -63,13 +63,13 @@ const Model3DMapGL : React.FC<Model3DMapGLProps> = ({
         const scene = new THREE.Scene();
         const camera = new THREE.Camera();
 
-        const light1 = new THREE.DirectionalLight(0xffffff);
-        light1.position.set(0, -70, 100).normalize();
+        const light1 = new THREE.DirectionalLight(0xffffff, 4);
+        light1.position.set(0, 180, 100).normalize();
         scene.add(light1);
 
-        const light2 = new THREE.DirectionalLight(0xffffff);
-        light2.position.set(0, 70, 100).normalize();
-        scene.add(light2);
+        // const light2 = new THREE.DirectionalLight(0xffffff, 4);
+        // light2.position.set(0, -180, 100).normalize();
+        // scene.add(light2);
 
         const loader = new GLTFLoader();
         loader.load(

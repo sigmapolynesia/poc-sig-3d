@@ -35,7 +35,7 @@ function App() {
     { id: 'globe', label: 'Globe', component: Globe, props: { height: '1000px' } }
   ];
 
-  const [currentView, setCurrentView] = useState<ViewType>('relief');
+  const [currentView, setCurrentView] = useState<ViewType>('3d-models');
   const [opened] = useDisclosure();
 
   const currentNavItem = navItems.find(item => item.id === currentView) || navItems[0];
