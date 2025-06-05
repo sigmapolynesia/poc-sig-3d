@@ -3,6 +3,7 @@ import GLTFMapGL from '../components/3d-models/gltf-map-gl';
 import GLTFGiro3D from '../components/3d-models/gltf-giro-3d';
 import GLBMapGL from '../components/3d-models/glb-map-gl';
 import GLBGiro3D from '../components/3d-models/glb-giro-3d';
+import GLBRMapGL from '../components/3d-models/glb-relief-map-gl';
 import { Tabs, Title, Text } from '@mantine/core';
 
 import MapLibreLogo from '../assets/maplibre.png';
@@ -30,6 +31,9 @@ const ModelsView = () => {
           <Tabs.Tab value="giro3dglb">
             <img src={Giro3DLogo} alt="Giro 3D GLB" style={{ height: '16px' }} />
           </Tabs.Tab>
+          <Tabs.Tab value="maplibre-relief">
+            <img src={MapLibreLogo} alt="MapLibre Relief" style={{ height: '20px' }} />
+          </Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="maplibre">
@@ -46,6 +50,10 @@ const ModelsView = () => {
 
         <Tabs.Panel value="giro3dglb">
           <GLBGiro3D />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="maplibre-relief">
+          <GLBRMapGL />
         </Tabs.Panel>
       </Tabs>
     </div>
