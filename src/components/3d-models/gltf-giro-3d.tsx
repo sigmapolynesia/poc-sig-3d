@@ -11,6 +11,7 @@ import XYZ from 'ol/source/XYZ';
 import { transform } from 'ol/proj';
 import MapContainer from '../MapContainer';
 import { GLTF_URL } from './config';
+import { Title } from '@mantine/core';
 
 interface GLTFGiro3DProps {
   modelUrl?: string;
@@ -191,8 +192,11 @@ const GLTFGiro3D: React.FC<GLTFGiro3DProps> = ({
     };
   }, [modelUrl]);
 
-  return (
+  return(
+    <div>
+      <Title order={2} mt={10}>GLTF Giro 3D</Title>
       <MapContainer ref={mapContainer} style={{ marginTop: '20px' }} />
+    </div>
   );
 };
 

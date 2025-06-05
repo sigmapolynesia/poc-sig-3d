@@ -5,6 +5,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import '../styles.css';
 import MapContainer from '../MapContainer';
 import { GLTF_URL } from './config';
+import { Title } from '@mantine/core';
 
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY;
 
@@ -175,7 +176,12 @@ const GLTFMapGL: React.FC<GLTFMapGLProps> = ({
     };
   }, []);
 
-  return <MapContainer ref={mapContainer} style={{ marginTop: '20px' }} />;
+  return(
+    <div>
+      <Title order={2} mt={10}>GLTF Map GL</Title>
+      <MapContainer ref={mapContainer} style={{ marginTop: '20px' }} />
+    </div>
+  );
 };
 
 export default GLTFMapGL;

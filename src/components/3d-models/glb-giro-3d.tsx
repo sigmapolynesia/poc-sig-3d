@@ -11,6 +11,7 @@ import XYZ from 'ol/source/XYZ';
 import { transform } from 'ol/proj';
 import MapContainer from '../MapContainer';
 import { GLB_URL } from './config';
+import { Title } from '@mantine/core';
 
 interface GLBGiro3DProps {
   modelUrl?: string;
@@ -191,8 +192,11 @@ const GLBGiro3D: React.FC<GLBGiro3DProps> = ({
     };
   }, [modelUrl]);
 
-  return (
+  return(
+    <div>
+      <Title order={2} mt={10}>GLB Giro 3D</Title>
       <MapContainer ref={mapContainer} style={{ marginTop: '20px' }} />
+    </div>
   );
 };
 
