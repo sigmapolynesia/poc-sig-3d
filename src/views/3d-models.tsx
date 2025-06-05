@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import GLTFMapGL from '../components/3d-models/3d-models-map-gl';
-import GLTFGiro3D from '../components/3d-models/3d-models-giro-3d';
+import GLTFMapGL from '../components/3d-models/gltf-map-gl';
+import GLTFGiro3D from '../components/3d-models/gltf-giro-3d';
 import GLBMapGL from '../components/3d-models/glb-map-gl';
 import GLBGiro3D from '../components/3d-models/glb-giro-3d';
 import { Tabs, Title, Text } from '@mantine/core';
