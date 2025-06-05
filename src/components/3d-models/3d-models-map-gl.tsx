@@ -8,13 +8,13 @@ import { GLTF_URL } from './config';
 
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY;
 
-interface Model3DMapGLProps {
+interface GLTFMapGLProps {
   center?: [number, number];
   zoom?: number;
   apiKey?: string;
 }
 
-const Model3DMapGL: React.FC<Model3DMapGLProps> = ({
+const GLTFMapGL: React.FC<GLTFMapGLProps> = ({
   center = [-140.168868, -8.863563],
   zoom = 15,
   apiKey = MAPTILER_KEY
@@ -178,4 +178,4 @@ const Model3DMapGL: React.FC<Model3DMapGLProps> = ({
   return <MapContainer ref={mapContainer} style={{ marginTop: '20px' }} />;
 };
 
-export default Model3DMapGL;
+export default GLTFMapGL;

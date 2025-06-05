@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import Model3DMapGL from '../components/3d-models/3d-models-map-gl';
-import Model3DGiro3D from '../components/3d-models/3d-models-giro-3d';
+import GLTFMapGL from '../components/3d-models/3d-models-map-gl';
+import GLTFGiro3D from '../components/3d-models/3d-models-giro-3d';
 import GLBMapGL from '../components/3d-models/glb-map-gl';
 import GLBGiro3D from '../components/3d-models/glb-giro-3d';
 import { Tabs, Title, Text } from '@mantine/core';
@@ -33,11 +33,11 @@ const ModelsView = () => {
         </Tabs.List>
 
         <Tabs.Panel value="maplibre">
-          <Model3DMapGL />
+          <GLTFMapGL />
         </Tabs.Panel>
 
         <Tabs.Panel value="giro3d">
-          <Model3DGiro3D />
+          <GLTFGiro3D />
         </Tabs.Panel>
 
         <Tabs.Panel value="maplibreglb">

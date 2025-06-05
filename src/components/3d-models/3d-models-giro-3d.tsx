@@ -12,14 +12,14 @@ import { transform } from 'ol/proj';
 import MapContainer from '../MapContainer';
 import { GLTF_URL } from './config';
 
-interface Model3DGiro3DProps {
+interface GLTFGiro3DProps {
   modelUrl?: string;
   modelPosition?: [number, number, number];
   modelRotation?: [number, number, number];
   modelScale?: number;
 }
 
-const Model3DGiro3D: React.FC<Model3DGiro3DProps> = ({
+const GLTFGiro3D: React.FC<GLTFGiro3DProps> = ({
   modelUrl = GLTF_URL,
   modelPosition = [-140.168868, -8.863563, 0], 
   modelRotation = [Math.PI / 2, 0, 0],
@@ -196,4 +196,4 @@ const Model3DGiro3D: React.FC<Model3DGiro3DProps> = ({
   );
 };
 
-export default Model3DGiro3D;
+export default GLTFGiro3D;
