@@ -6,6 +6,7 @@ import '../styles.css';
 import MapContainer from '../MapContainer';
 import { GLB_URL } from './config';
 import { Title } from '@mantine/core';
+import { DEM_URL } from './config';
 
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY;
 
@@ -35,6 +36,39 @@ const GLBRMapGL: React.FC<GLBMapGLProps> = ({
     });
 
     mapRef.current = map;
+    map.addControl(new maplibregl.NavigationControl());
+      
+          map.on('load', () => {
+            map.addSource("terrain", {
+              "type": "raster-dem",
+              "url": DEM_URL,
+            });
+    
+            map.addSource("hillshade", {
+              "type": "raster-dem",
+              "url": DEM_URL,
+            });
+    
+            map.addLayer({
+              "id": "hillshade",
+              "type": "hillshade",
+              "source": "hillshade",
+              layout: {visibility: 'visible'},
+              paint: {
+                'hillshade-shadow-color': '#473B24',
+                'hillshade-highlight-color': '#FAFAFF',
+                'hillshade-accent-color': '#8B7355',
+                'hillshade-illumination-direction': 315,
+                'hillshade-illumination-anchor': 'viewport',
+                'hillshade-exaggeration': 0.35
+              }
+            });
+    
+            map.setTerrain({
+              source: "terrain",
+              exaggeration: 1
+            });
+          });
 
     const modelOrigin: [number, number] = [-140.168868, -8.863563];
     const modelAltitude = 0;
