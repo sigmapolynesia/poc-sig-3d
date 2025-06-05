@@ -32,6 +32,7 @@ const GLTFMapGL: React.FC<GLTFMapGLProps> = ({
       center,
       zoom,
       pitch: 30,
+      canvasContextAttributes: {antialias: true, preserveDrawingBuffer: true}
     });
 
     mapRef.current = map;

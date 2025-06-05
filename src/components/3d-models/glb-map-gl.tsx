@@ -32,6 +32,7 @@ const GLBMapGL: React.FC<GLBMapGLProps> = ({
       center,
       zoom,
       pitch: 30,
+      canvasContextAttributes: {antialias: true, preserveDrawingBuffer: true}
     });
 
     mapRef.current = map;
