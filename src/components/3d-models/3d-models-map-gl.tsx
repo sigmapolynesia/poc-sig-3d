@@ -10,14 +10,14 @@ const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY;
 
 interface Model3DMapGLProps {
   center?: [number, number];
-    zoom?: number;
-    apiKey?: string;
+  zoom?: number;
+  apiKey?: string;
 }
 
-const Model3DMapGL : React.FC<Model3DMapGLProps> = ({
-    center = [-140.168868, -8.863563],
-    zoom = 15,
-    apiKey = MAPTILER_KEY
+const Model3DMapGL: React.FC<Model3DMapGLProps> = ({
+  center = [-140.168868, -8.863563],
+  zoom = 15,
+  apiKey = MAPTILER_KEY
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map | null>(null);
@@ -28,10 +28,9 @@ const Model3DMapGL : React.FC<Model3DMapGLProps> = ({
     const map = new maplibregl.Map({
       container: mapContainer.current,
       style: `https://api.maptiler.com/maps/streets/style.json?key=${apiKey}`,
-      center: center,
-      zoom: zoom,
+      center,
+      zoom,
       pitch: 30,
-      canvasContextAttributes: { antialias: true },
     });
 
     mapRef.current = map;
@@ -59,7 +58,7 @@ const Model3DMapGL : React.FC<Model3DMapGLProps> = ({
       id: '3d-model',
       type: 'custom',
       renderingMode: '3d',
-      onAdd(map, gl) {
+      onAdd(map, _gl) {
         const scene = new THREE.Scene();
         const camera = new THREE.Camera();
 
@@ -67,29 +66,40 @@ const Model3DMapGL : React.FC<Model3DMapGLProps> = ({
         light1.position.set(180, 180, 100).normalize();
         scene.add(light1);
 
-        // const light2 = new THREE.DirectionalLight(0xffffff, 4);
-        // light2.position.set(0, -180, 100).normalize();
-        // scene.add(light2);
-
         const loader = new GLTFLoader();
-        loader.load(
-          GLTF_URL,
-          (gltf) => {
-            scene.add(gltf.scene);
-          }
-        );
+        loader.load(GLTF_URL, (gltf) => {
+          scene.add(gltf.scene);
+        });
 
         const renderer = new THREE.WebGLRenderer({
-          canvas: map.getCanvas(),
-          context: gl,
           antialias: true,
+          alpha: true,
         });
+
+        renderer.setSize(map.getCanvas().width, map.getCanvas().height);
+        renderer.setPixelRatio(window.devicePixelRatio);
         renderer.autoClear = false;
+
+        const canvas = renderer.domElement;
+        canvas.style.position = 'absolute';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        canvas.style.pointerEvents = 'none';
+
+        map.getContainer().appendChild(canvas);
+
+        map.on('resize', () => {
+          renderer.setSize(map.getCanvas().width, map.getCanvas().height);
+        });
 
         (this as any).scene = scene;
         (this as any).camera = camera;
         (this as any).renderer = renderer;
+        (this as any).canvas = canvas;
       },
+
       render(_gl, matrix) {
         const rotationX = new THREE.Matrix4().makeRotationAxis(
           new THREE.Vector3(1, 0, 0),
@@ -122,10 +132,34 @@ const Model3DMapGL : React.FC<Model3DMapGLProps> = ({
           .multiply(rotationY)
           .multiply(rotationZ);
 
-        (this as any).camera.projectionMatrix = m.multiply(l);
-        (this as any).renderer.resetState();
-        (this as any).renderer.render((this as any).scene, (this as any).camera);
+        const camera = (this as any).camera;
+        const renderer = (this as any).renderer;
+        const scene = (this as any).scene;
+
+        camera.projectionMatrix = m.multiply(l);
+
+        renderer.resetState();
+        renderer.render(scene, camera);
+
         map.triggerRepaint();
+      },
+
+      onRemove(_map, _gl) {
+        const renderer = (this as any).renderer;
+        const canvas = (this as any).canvas;
+        const scene = (this as any).scene;
+
+        if (renderer) {
+          renderer.dispose();
+        }
+
+        if (canvas && canvas.parentNode) {
+          canvas.parentNode.removeChild(canvas);
+        }
+
+        if (scene) {
+          scene.clear();
+        }
       },
     };
 
@@ -134,8 +168,10 @@ const Model3DMapGL : React.FC<Model3DMapGLProps> = ({
     });
 
     return () => {
-      map.remove();
-      mapRef.current = null;
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
     };
   }, []);
 
