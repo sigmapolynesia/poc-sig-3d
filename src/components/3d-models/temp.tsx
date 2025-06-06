@@ -138,11 +138,8 @@ const GLBRMapGL = () => {
           const model1Merc = MercatorCoordinate.fromLngLat(model1Location);
 
           const { dEastMeter: m1east, dNorthMeter: m1north } = calculateDistanceMercatorToMeters(originMercator, model1Merc);
-
-          const box = new THREE.Box3().setFromObject(model1);
-          const modelHeight = box.max.z - box.min.z;
           
-          model1.position.set(m1east, model1up - modelHeight - 455, m1north);
+          model1.position.set(m1east, model1up, m1north);
 
           scene.add(model1);
 
