@@ -2,13 +2,11 @@ import { useState } from 'react';
 import ReliefMapGL from '../components/relief/relief-map-gl';
 import ReliefGiro3D from '../components/relief/relief-giro-3d';
 import ReliefCesiumJS from '../components/relief/relief-cesium-js';
-import ReliefglTF from '../components/relief/relief-gltf';
 import { Tabs, Title, Text } from '@mantine/core';
 
 import MapLibreLogo from '../assets/maplibre.png';
 import Giro3DLogo from '../assets/giro3d.png';
 import CesiumLogo from '../assets/cesium.png';
-import SigmaLogo from '../assets/logosigma.png';
 
 const ReliefView = () => {
   const [activeTab, setActiveTab] = useState('maplibre');
@@ -29,9 +27,6 @@ const ReliefView = () => {
           <Tabs.Tab value="cesium">
             <img src={CesiumLogo} alt="Cesium" style={{ height: '20px' }} />
           </Tabs.Tab>
-          <Tabs.Tab value="gltf">
-            <img src={SigmaLogo} alt="GLTF" style={{ height: '20px' }} />
-          </Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="maplibre">
@@ -44,10 +39,6 @@ const ReliefView = () => {
 
         <Tabs.Panel value="cesium">
           <ReliefCesiumJS />
-        </Tabs.Panel>
-
-        <Tabs.Panel value="gltf">
-          <ReliefglTF />
         </Tabs.Panel>
       </Tabs>
     </div>

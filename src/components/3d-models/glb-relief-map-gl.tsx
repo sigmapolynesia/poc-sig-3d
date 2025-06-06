@@ -6,6 +6,8 @@ import MapContainer from '../MapContainer';
 import '../styles.css';
 import { GLB_URL, DEM_URL } from './config';
 
+const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY;
+
 const GLBRMapGL = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map | null>(null);
@@ -16,7 +18,7 @@ const GLBRMapGL = () => {
     const container = mapContainer.current;
 
     const sceneOrigin = new LngLat(-140.168868, -8.863563);
-    const model1Location = new LngLat(-140.168868, -8.863563);
+    const model1Location = new LngLat(-140.168839965111, -8.86362283724564);
 
     const calculateDistanceMercatorToMeters = (
       from: MercatorCoordinate,
@@ -46,58 +48,45 @@ const GLBRMapGL = () => {
         zoom: 16.27,
         pitch: 60,
         bearing: -28.5,
-        canvasContextAttributes: { antialias: true },
-        style: {
-          version: 8,
-          sources: {
-            'osm': {
-              type: 'raster',
-              tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-              tileSize: 256,
-              attribution: '© OpenStreetMap contributors'
-            },
-            terrainSource: {
-              type: 'raster-dem',
-              url: DEM_URL,
-              
-            },
-            hillshadeSource: {
-              type: 'raster-dem',
-              url: DEM_URL,
-              
-            },
-          },
-          layers: [
-            {
-              id: 'osm-background',
-              type: 'raster',
-              source: 'osm',
-              minzoom: 0,
-              maxzoom: 22
-            },
-            {
-              "id": "hillshade",
-                "type": "hillshade",
-                "source": 'hillshadeSource',
-                layout: {visibility: 'visible'},
-                paint: {
-                    'hillshade-shadow-color': '#473B24',
-                    'hillshade-highlight-color': '#FAFAFF',
-                    'hillshade-accent-color': '#8B7355',
-                    'hillshade-illumination-direction': 315,
-                    'hillshade-illumination-anchor': 'viewport',
-                    'hillshade-exaggeration': 0.35
-                }
-            },
-          ],
-          terrain: {
-            source: 'terrainSource',
-            exaggeration: 1,
-          },
-        },
+        canvasContextAttributes: { antialias: true, preserveDrawingBuffer: true },
+        style: `https://api.maptiler.com/maps/satellite/style.json?key=${MAPTILER_KEY}`,
       });
 
       mapRef.current = map;
+      map.addControl(new maplibregl.NavigationControl());
+        
+            map.on('load', () => {
+              map.addSource("terrain", {
+                "type": "raster-dem",
+                "url": DEM_URL,
+              });
+      
+              map.addSource("hillshade", {
+                "type": "raster-dem",
+                "url": DEM_URL,
+              });
+      
+              map.addLayer({
+                "id": "hillshade",
+                "type": "hillshade",
+                "source": "hillshade",
+                layout: {visibility: 'visible'},
+                paint: {
+                  'hillshade-shadow-color': '#473B24',
+                  'hillshade-highlight-color': '#FAFAFF',
+                  'hillshade-accent-color': '#8B7355',
+                  'hillshade-illumination-direction': 315,
+                  'hillshade-illumination-anchor': 'viewport',
+                  'hillshade-exaggeration': 0.35
+                }
+              });
+      
+              map.setTerrain({
+                source: "terrain",
+                exaggeration: 1
+              });
+            });
+      
 
       const [model1] = await Promise.all([
         loadModel(),
