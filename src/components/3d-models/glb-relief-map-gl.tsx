@@ -1,222 +1,200 @@
 import { useEffect, useRef } from 'react';
-import maplibregl, { Map, MercatorCoordinate, CustomLayerInterface } from 'maplibre-gl';
+import maplibregl, { Map, LngLat, MercatorCoordinate } from 'maplibre-gl';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import '../styles.css';
 import MapContainer from '../MapContainer';
-import { GLB_URL } from './config';
-import { Title } from '@mantine/core';
-import { DEM_URL } from './config';
+import '../styles.css';
+import { GLB_URL, DEM_URL } from './config';
 
-const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY;
-
-interface GLBMapGLProps {
-  center?: [number, number];
-  zoom?: number;
-  apiKey?: string;
-}
-
-const GLBRMapGL: React.FC<GLBMapGLProps> = ({
-  center = [-140.168868, -8.863563],
-  zoom = 15,
-  apiKey = MAPTILER_KEY
-}) => {
+const GLBRMapGL = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map | null>(null);
 
   useEffect(() => {
-    if (!mapContainer.current || mapRef.current) return;
+    if (!mapContainer.current) return;
 
-    const map = new maplibregl.Map({
-      container: mapContainer.current,
-      style: `https://api.maptiler.com/maps/streets/style.json?key=${apiKey}`,
-      center,
-      zoom,
-      pitch: 30,
-      canvasContextAttributes: {antialias: true, preserveDrawingBuffer: true}
-    });
+    const container = mapContainer.current;
 
-    mapRef.current = map;
-    map.addControl(new maplibregl.NavigationControl());
-      
-          map.on('load', () => {
-            map.addSource("terrain", {
-              "type": "raster-dem",
-              "url": DEM_URL,
-            });
-    
-            map.addSource("hillshade", {
-              "type": "raster-dem",
-              "url": DEM_URL,
-            });
-    
-            map.addLayer({
+    const sceneOrigin = new LngLat(-140.168868, -8.863563);
+    const model1Location = new LngLat(-140.168868, -8.863563);
+
+    const calculateDistanceMercatorToMeters = (
+      from: MercatorCoordinate,
+      to: MercatorCoordinate
+    ) => {
+      const mercatorPerMeter = from.meterInMercatorCoordinateUnits();
+      const dEast = to.x - from.x;
+      const dNorth = from.y - to.y;
+      return {
+        dEastMeter: dEast / mercatorPerMeter,
+        dNorthMeter: dNorth / mercatorPerMeter,
+      };
+    };
+
+    const loadModel = async () => {
+      const loader = new GLTFLoader();
+      const gltf = await loader.loadAsync(
+        GLB_URL
+      );
+      return gltf.scene;
+    };
+
+    const initMap = async () => {
+      const map = new maplibregl.Map({
+        container: container,
+        center: [-140.168868, -8.863563],
+        zoom: 16.27,
+        pitch: 60,
+        bearing: -28.5,
+        canvasContextAttributes: { antialias: true },
+        style: {
+          version: 8,
+          sources: {
+            'osm': {
+              type: 'raster',
+              tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+              tileSize: 256,
+              attribution: '© OpenStreetMap contributors'
+            },
+            terrainSource: {
+              type: 'raster-dem',
+              url: DEM_URL,
+              
+            },
+            hillshadeSource: {
+              type: 'raster-dem',
+              url: DEM_URL,
+              
+            },
+          },
+          layers: [
+            {
+              id: 'osm-background',
+              type: 'raster',
+              source: 'osm',
+              minzoom: 0,
+              maxzoom: 22
+            },
+            {
               "id": "hillshade",
-              "type": "hillshade",
-              "source": "hillshade",
-              layout: {visibility: 'visible'},
-              paint: {
-                'hillshade-shadow-color': '#473B24',
-                'hillshade-highlight-color': '#FAFAFF',
-                'hillshade-accent-color': '#8B7355',
-                'hillshade-illumination-direction': 315,
-                'hillshade-illumination-anchor': 'viewport',
-                'hillshade-exaggeration': 0.35
-              }
-            });
-    
-            map.setTerrain({
-              source: "terrain",
-              exaggeration: 1
-            });
+                "type": "hillshade",
+                "source": 'hillshadeSource',
+                layout: {visibility: 'visible'},
+                paint: {
+                    'hillshade-shadow-color': '#473B24',
+                    'hillshade-highlight-color': '#FAFAFF',
+                    'hillshade-accent-color': '#8B7355',
+                    'hillshade-illumination-direction': 315,
+                    'hillshade-illumination-anchor': 'viewport',
+                    'hillshade-exaggeration': 0.35
+                }
+            },
+          ],
+          terrain: {
+            source: 'terrainSource',
+            exaggeration: 1,
+          },
+        },
+      });
+
+      mapRef.current = map;
+
+      const [model1] = await Promise.all([
+        loadModel(),
+        new Promise<void>((resolve) => map.once('load', resolve)),
+      ]);
+
+      type CustomLayerWithThree = {
+        id: string;
+        type: 'custom';
+        renderingMode: '3d';
+        scene?: THREE.Scene;
+        camera?: THREE.Camera;
+        renderer?: THREE.WebGLRenderer;
+        onAdd(map: Map, gl: WebGLRenderingContext): void;
+        render(_gl: WebGLRenderingContext, matrix: any): void;
+      };
+
+      const customLayer: CustomLayerWithThree = {
+        id: '3d-model',
+        type: 'custom',
+        renderingMode: '3d',
+
+        onAdd(map: Map, gl: WebGLRenderingContext) {
+          const camera = new THREE.Camera();
+          const scene = new THREE.Scene();
+          scene.rotateX(Math.PI / 2);
+
+          const light = new THREE.DirectionalLight(0xffffff, 4);
+          light.position.set(180, 180, 100).normalize();
+          scene.add(light);
+
+          const sceneElevation = map.queryTerrainElevation(sceneOrigin) || 0;
+          const model1Elevation = map.queryTerrainElevation(model1Location) || 0;
+
+          const model1up = model1Elevation - sceneElevation;
+
+          const originMercator = MercatorCoordinate.fromLngLat(sceneOrigin);
+          const model1Merc = MercatorCoordinate.fromLngLat(model1Location);
+
+          const { dEastMeter: m1east, dNorthMeter: m1north } = calculateDistanceMercatorToMeters(originMercator, model1Merc);
+          
+          model1.position.set(m1east, model1up, m1north);
+
+          scene.add(model1);
+
+          const renderer = new THREE.WebGLRenderer({
+            canvas: map.getCanvas(),
+            context: gl,
+            antialias: true,
           });
+          renderer.autoClear = false;
 
-    const modelOrigin: [number, number] = [-140.168868, -8.863563];
-    const modelAltitude = 0;
-    const modelRotate: [number, number, number] = [Math.PI / 2, 0, 0];
+          (this as CustomLayerWithThree).scene = scene;
+          (this as CustomLayerWithThree).camera = camera;
+          (this as CustomLayerWithThree).renderer = renderer;
+        },
 
-    const modelAsMercatorCoordinate = MercatorCoordinate.fromLngLat(
-      modelOrigin,
-      modelAltitude
-    );
+        render(_gl: WebGLRenderingContext, matrix: any) {
+          const map = mapRef.current!;
+          const offsetElevation = map.queryTerrainElevation(sceneOrigin) || 0;
+          const originMercator = MercatorCoordinate.fromLngLat(sceneOrigin, offsetElevation);
 
-    const modelTransform = {
-      translateX: modelAsMercatorCoordinate.x,
-      translateY: modelAsMercatorCoordinate.y,
-      translateZ: modelAsMercatorCoordinate.z,
-      rotateX: modelRotate[0],
-      rotateY: modelRotate[1],
-      rotateZ: modelRotate[2],
-      scale: modelAsMercatorCoordinate.meterInMercatorCoordinateUnits(),
-    };
+          const transform = {
+            translateX: originMercator.x,
+            translateY: originMercator.y,
+            translateZ: originMercator.z,
+            scale: originMercator.meterInMercatorCoordinateUnits(),
+          };
 
-    const customLayer: CustomLayerInterface = {
-      id: '3d-model',
-      type: 'custom',
-      renderingMode: '3d',
-      onAdd(map, _gl) {
-        const scene = new THREE.Scene();
-        const camera = new THREE.Camera();
+          const projMatrix = new THREE.Matrix4().fromArray(matrix.defaultProjectionData.mainMatrix);
+          const transMatrix = new THREE.Matrix4()
+            .makeTranslation(transform.translateX, transform.translateY, transform.translateZ)
+            .scale(new THREE.Vector3(transform.scale, -transform.scale, transform.scale));
 
-        const light1 = new THREE.DirectionalLight(0xffffff, 4);
-        light1.position.set(180, 180, 100).normalize();
-        scene.add(light1);
+          const camera = (this as CustomLayerWithThree).camera!;
+          const renderer = (this as CustomLayerWithThree).renderer!;
+          const scene = (this as CustomLayerWithThree).scene!;
 
-        const loader = new GLTFLoader();
-        loader.load(GLB_URL, (gltf) => {
-          scene.add(gltf.scene);
-        });
+          camera.projectionMatrix = projMatrix.multiply(transMatrix);
+          renderer.resetState();
+          renderer.render(scene, camera);
+          map.triggerRepaint();
+        },
+      };
 
-        const renderer = new THREE.WebGLRenderer({
-          antialias: true,
-          alpha: true,
-        });
-
-        renderer.setSize(map.getCanvas().width, map.getCanvas().height);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.autoClear = false;
-
-        const canvas = renderer.domElement;
-        canvas.style.position = 'absolute';
-        canvas.style.top = '0';
-        canvas.style.left = '0';
-        canvas.style.width = '100%';
-        canvas.style.height = '100%';
-        canvas.style.pointerEvents = 'none';
-
-        map.getContainer().appendChild(canvas);
-
-        map.on('resize', () => {
-          renderer.setSize(map.getCanvas().width, map.getCanvas().height);
-        });
-
-        (this as any).scene = scene;
-        (this as any).camera = camera;
-        (this as any).renderer = renderer;
-        (this as any).canvas = canvas;
-      },
-
-      render(_gl, matrix) {
-        const rotationX = new THREE.Matrix4().makeRotationAxis(
-          new THREE.Vector3(1, 0, 0),
-          modelTransform.rotateX
-        );
-        const rotationY = new THREE.Matrix4().makeRotationAxis(
-          new THREE.Vector3(0, 1, 0),
-          modelTransform.rotateY
-        );
-        const rotationZ = new THREE.Matrix4().makeRotationAxis(
-          new THREE.Vector3(0, 0, 1),
-          modelTransform.rotateZ
-        );
-
-        const m = new THREE.Matrix4().fromArray(matrix.defaultProjectionData.mainMatrix);
-        const l = new THREE.Matrix4()
-          .makeTranslation(
-            modelTransform.translateX,
-            modelTransform.translateY,
-            modelTransform.translateZ
-          )
-          .scale(
-            new THREE.Vector3(
-              modelTransform.scale,
-              -modelTransform.scale,
-              modelTransform.scale
-            )
-          )
-          .multiply(rotationX)
-          .multiply(rotationY)
-          .multiply(rotationZ);
-
-        const camera = (this as any).camera;
-        const renderer = (this as any).renderer;
-        const scene = (this as any).scene;
-
-        camera.projectionMatrix = m.multiply(l);
-
-        renderer.resetState();
-        renderer.render(scene, camera);
-
-        map.triggerRepaint();
-      },
-
-      onRemove(_map, _gl) {
-        const renderer = (this as any).renderer;
-        const canvas = (this as any).canvas;
-        const scene = (this as any).scene;
-
-        if (renderer) {
-          renderer.dispose();
-        }
-
-        if (canvas && canvas.parentNode) {
-          canvas.parentNode.removeChild(canvas);
-        }
-
-        if (scene) {
-          scene.clear();
-        }
-      },
-    };
-
-    map.on('style.load', () => {
       map.addLayer(customLayer);
-    });
+    };
+
+    initMap();
 
     return () => {
-      if (mapRef.current) {
-        mapRef.current.remove();
-        mapRef.current = null;
-      }
+      mapRef.current?.remove();
+      mapRef.current = null;
     };
   }, []);
 
-  return(
-    <div>
-      <Title order={2} mt={10}>Relief GLB Map GL</Title>
-      <MapContainer ref={mapContainer} style={{ marginTop: '20px' }} />
-    </div>
-  );
+  return <MapContainer ref={mapContainer} style={{ marginTop: '20px' }} />;
 };
 
 export default GLBRMapGL;
