@@ -5,14 +5,18 @@ import { DEM_URL } from './config';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
+const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY;
+
 interface DEMMapGLProps {
   center?: [number, number]; 
   zoom?: number;
+  apiKey?: string;
 }
 
 const ReliefMapGL: React.FC<DEMMapGLProps> = ({
     center = [-140.1289, -8.8732],
     zoom = 12,
+    apiKey = MAPTILER_KEY,
   }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<maplibregl.Map | null>(null);
@@ -22,26 +26,7 @@ const ReliefMapGL: React.FC<DEMMapGLProps> = ({
   
       const map = new maplibregl.Map({
         container: mapContainer.current,
-        style: {
-          version: 8,
-          sources: {
-            'osm': {
-              type: 'raster',
-              tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-              tileSize: 256,
-              attribution: '© OpenStreetMap contributors'
-            },
-          },
-          layers: [
-            {
-              id: 'osm-background',
-              type: 'raster',
-              source: 'osm',
-              minzoom: 0,
-              maxzoom: 22
-            },
-          ],
-        },
+        style: `https://api.maptiler.com/maps/satellite/style.json?key=${apiKey}`,
         center: center,
         zoom: zoom
       });
