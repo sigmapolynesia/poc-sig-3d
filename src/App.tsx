@@ -4,6 +4,7 @@ import { useDisclosure } from '@mantine/hooks';
 import '@mantine/core/styles.css';
 import './App.css';
 import Globe from './components/Globe';
+import MultiLayer from './components/MultiLayer';
 import WMTSView from './views/wmts';
 import ReliefView from './views/relief';
 import GeojsonView from './views/geojson';
@@ -14,7 +15,7 @@ import ModelsView from './views/3d-models';
 import logoSigma from './assets/logosigma.png';
 import React from 'react';
 
-type ViewType = 'globe' | 'wmts' | 'relief' | 'geojson' | 'mvt' | 'lidar' | '3d-tiles' | '3d-models';
+type ViewType = 'multi-layer' | 'globe' | 'wmts' | 'relief' | 'geojson' | 'mvt' | 'lidar' | '3d-tiles' | '3d-models';
 
 interface NavItem {
   id: ViewType;
@@ -32,10 +33,11 @@ function App() {
     { id: 'lidar', label: 'LIDAR', component: LidarView },
     { id: '3d-tiles', label: '3D Tiles', component: DtilesView },
     { id: '3d-models', label: '3D Models', component: ModelsView },
-    { id: 'globe', label: 'Globe', component: Globe, props: { height: '1000px' } }
+    { id: 'globe', label: 'Globe', component: Globe, props: { height: '1000px' } },
+    { id: 'multi-layer', label: 'Multi Layer', component: MultiLayer }
   ];
 
-  const [currentView, setCurrentView] = useState<ViewType>('relief');
+  const [currentView, setCurrentView] = useState<ViewType>('multi-layer');
   const [opened] = useDisclosure();
 
   const currentNavItem = navItems.find(item => item.id === currentView) || navItems[0];
