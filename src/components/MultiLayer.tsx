@@ -71,6 +71,14 @@ const MultiLayer: React.FC<LayerProps> = ({
       exaggeration: 1,
     });
 
+    map.addLayer({
+        id: "background-blue",
+        type: "background",
+        paint: {
+            "background-color": "#312e9f",
+        }
+    });
+
     // 2. WMTS 
     const wmtsLayer = layers.find(l => l.identifier === currentLayer);
     if (wmtsLayer) {
