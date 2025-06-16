@@ -28,7 +28,8 @@ const ReliefMapGL: React.FC<DEMMapGLProps> = ({
         container: mapContainer.current,
         style: `https://api.maptiler.com/maps/satellite/style.json?key=${apiKey}`,
         center: center,
-        zoom: zoom
+        zoom: zoom,
+        pitch: 60,
       });
   
       mapInstance.current = map;
