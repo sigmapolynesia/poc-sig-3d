@@ -34,9 +34,26 @@ const MultiLayer: React.FC<LayerProps> = ({
 
   const map = new maplibregl.Map({
     container: mapContainer.current,
-    style: { version: 8, sources: {}, layers: [] },
-    center,
-    zoom,
+    style: { 
+      version: 8, 
+      sources: {}, 
+      layers: [
+        {
+          id: "background-blue",
+          type: "background",
+          paint: {
+            "background-color": "#87CEEB", 
+          },
+        },
+      ],
+      sky: {
+            "sky-color": "#87CEEB",        
+            "horizon-color": "#B0E0E6",     
+            "sky-horizon-blend": 1,      
+          } },
+      center,
+      zoom,
+      maxPitch: 82,
   });
 
   map.addControl(new maplibregl.NavigationControl());
@@ -72,14 +89,6 @@ const MultiLayer: React.FC<LayerProps> = ({
     map.setTerrain({
       source: "terrain",
       exaggeration: 1,
-    });
-
-    map.addLayer({
-        id: "background-blue",
-        type: "background",
-        paint: {
-            "background-color": "#312e9f",
-        }
     });
 
     // 2. WMTS 
@@ -184,7 +193,7 @@ const MultiLayer: React.FC<LayerProps> = ({
 }, [center, zoom, currentLayer, layers]);
 
 
-  return <MapContainer ref={mapContainer} />;
+  return <MapContainer ref={mapContainer} bg={'#87CEEB'}/>;
 };
 
 export default MultiLayer;
