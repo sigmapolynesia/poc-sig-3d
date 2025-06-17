@@ -7,6 +7,8 @@ import { DEM_URL, GEOJSON_URL, MVT_URL, WMTS_URL } from './config-ml';
 import { configureMapLibreWMTS, configureMapLibreGeoJSON  } from '../utils/maplibre-utils';
 import { generateTMSTileUrl } from '../types/tms-parse.ts'
 
+// const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY;
+
 interface LayerProps {
   center?: [number, number];
   zoom?: number;
@@ -86,7 +88,67 @@ const MultiLayer: React.FC<LayerProps> = ({
       configureMapLibreWMTS(map, wmtsLayer, WMTS_URL);
     }
 
-    // 3. MVT 
+    /*
+    // 3. OpenMapTiles - Extrusion
+    map.addSource('openmaptiles', {
+      type: 'vector',
+      url: `https://api.maptiler.com/tiles/v3/tiles.json?key=${MAPTILER_KEY}`,
+      bounds: [
+        -157.991444123,
+        -31.231688228,
+        -132.180691427,
+        -4.991502196
+      ],
+    });
+
+    map.addLayer({
+      id: 'buildings-fill',
+      type: 'fill-extrusion',
+      source: 'openmaptiles',
+      'source-layer': 'building',
+      minzoom: 15,
+      paint: {
+        'fill-extrusion-color': [
+          'case',
+          ['has', 'colour'],
+          ['get', 'colour'],
+          '#aaa'
+        ],
+        'fill-extrusion-height': [
+          'case',
+          ['has', 'render_height'],
+          ['get', 'render_height'],
+          ['case',
+            ['has', 'height'],
+            ['get', 'height'],
+            5 
+          ]
+        ],
+        'fill-extrusion-base': [
+          'case',
+          ['has', 'render_min_height'],
+          ['get', 'render_min_height'],
+          0
+        ],
+        'fill-extrusion-opacity': 0.8
+      }
+    });
+
+    map.addLayer({
+      id: 'buildings-outline',
+      type: 'line',
+      source: 'openmaptiles',
+      'source-layer': 'building',
+      minzoom: 15,
+      paint: {
+        'line-color': '#666',
+        'line-width': 0.5,
+        'line-opacity': 0.6
+      }
+    });
+    */
+
+    // 4. MVT 
     map.addSource("pga-source", {
       type: "vector",
       tiles: [generateTMSTileUrl(MVT_URL)],
@@ -108,7 +170,7 @@ const MultiLayer: React.FC<LayerProps> = ({
       maxzoom: 22,
     });
 
-    // 4. GeoJSON
+    // 5. GeoJSON
     try {
       const res = await fetch(GEOJSON_URL);
       if (!res.ok) throw new Error("Failed to load GeoJSON");
