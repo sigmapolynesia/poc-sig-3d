@@ -97,17 +97,10 @@ const MultiLayer: React.FC<LayerProps> = ({
       configureMapLibreWMTS(map, wmtsLayer, WMTS_URL);
     }
 
-    /*
     // 3. OpenMapTiles - Extrusion
     map.addSource('openmaptiles', {
       type: 'vector',
-      url: `https://api.maptiler.com/tiles/v3/tiles.json?key=${MAPTILER_KEY}`,
-      bounds: [
-        -157.991444123,
-        -31.231688228,
-        -132.180691427,
-        -4.991502196
-      ],
+      url: 'http://localhost:8080/data/v3.json', 
     });
 
     map.addLayer({
@@ -117,45 +110,22 @@ const MultiLayer: React.FC<LayerProps> = ({
       'source-layer': 'building',
       minzoom: 15,
       paint: {
-        'fill-extrusion-color': [
-          'case',
-          ['has', 'colour'],
-          ['get', 'colour'],
-          '#aaa'
-        ],
+        'fill-extrusion-color': '#e9dfad',
         'fill-extrusion-height': [
           'case',
-          ['has', 'render_height'],
-          ['get', 'render_height'],
-          ['case',
-            ['has', 'height'],
-            ['get', 'height'],
-            5 
-          ]
+          ['has', 'height'],
+          ['get', 'height'],
+          5 
         ],
         'fill-extrusion-base': [
           'case',
-          ['has', 'render_min_height'],
-          ['get', 'render_min_height'],
+          ['has', 'min_height'],
+          ['get', 'min_height'],
           0
         ],
         'fill-extrusion-opacity': 0.8
       }
     });
-
-    map.addLayer({
-      id: 'buildings-outline',
-      type: 'line',
-      source: 'openmaptiles',
-      'source-layer': 'building',
-      minzoom: 15,
-      paint: {
-        'line-color': '#666',
-        'line-width': 0.5,
-        'line-opacity': 0.6
-      }
-    });
-    */
 
     // 4. MVT 
     map.addSource("pga-source", {
