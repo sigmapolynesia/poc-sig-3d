@@ -40,6 +40,7 @@ const MultiLayer: React.FC<LayerProps> = ({
   map.addControl(new maplibregl.NavigationControl());
 
   map.on('load', async () => {
+
     // 1. DEM 
     map.addSource("terrain", {
       type: "raster-dem",
