@@ -67,11 +67,13 @@ const MultiLayer: React.FC<LayerProps> = ({
     map.addSource("terrain", {
       type: "raster-dem",
       url: DEM_URL,
+      "encoding": "mapbox",
     });
 
     map.addSource("hillshade", {
       type: "raster-dem",
       url: DEM_URL,
+      "encoding": "mapbox",
     });
 
     map.addLayer({
