@@ -58,6 +58,7 @@ const MultiLayer: React.FC<LayerProps> = ({
       maxPitch: 82,
   });
 
+  mapRef.current = map;
   map.addControl(new maplibregl.NavigationControl());
 
   map.on('load', async () => {
@@ -162,6 +163,15 @@ const MultiLayer: React.FC<LayerProps> = ({
       console.error(e);
     }
   });
+
+  return () => {
+    maplibregl.removeProtocol("pmtiles");
+    
+    if (mapRef.current) {
+      mapRef.current.remove();
+      mapRef.current = null;
+    }
+  };
 }, [center, zoom, currentLayer, layers]);
 
 
