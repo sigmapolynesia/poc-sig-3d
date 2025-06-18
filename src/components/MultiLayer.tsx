@@ -7,8 +7,6 @@ import { DEM_URL, GEOJSON_URL, MVT_URL, WMTS_URL } from './config-ml';
 import { configureMapLibreWMTS, configureMapLibreGeoJSON  } from '../utils/maplibre-utils';
 import { generateTMSTileUrl } from '../types/tms-parse.ts'
 
-// const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY;
-
 interface LayerProps {
   center?: [number, number];
   zoom?: number;
@@ -60,7 +58,7 @@ const MultiLayer: React.FC<LayerProps> = ({
 
   map.on('load', async () => {
 
-    // 1. DEM 
+    // 1. DEM Topo + Bathy sur tout la Polynésie
     map.addSource("terrain", {
       type: "raster-dem",
       url: DEM_URL,
@@ -91,13 +89,13 @@ const MultiLayer: React.FC<LayerProps> = ({
       exaggeration: 1,
     });
 
-    // 2. WMTS 
+    // 2. WMTS Te Fenua
     const wmtsLayer = layers.find(l => l.identifier === currentLayer);
     if (wmtsLayer) {
       configureMapLibreWMTS(map, wmtsLayer, WMTS_URL);
     }
 
-    // 3. OpenMapTiles - Extrusion
+    // 3. Extrusion de bâtiments via Tileserver-GL - format -> PMTiles
     map.addSource('openmaptiles', {
       type: 'vector',
       url: 'http://localhost:8080/data/v3.json', 
@@ -127,7 +125,7 @@ const MultiLayer: React.FC<LayerProps> = ({
       }
     });
 
-    // 4. MVT 
+    // 4. MVT sur Paea
     map.addSource("pga-source", {
       type: "vector",
       tiles: [generateTMSTileUrl(MVT_URL)],
@@ -149,7 +147,7 @@ const MultiLayer: React.FC<LayerProps> = ({
       maxzoom: 22,
     });
 
-    // 5. GeoJSON
+    // 5. GeoJSON Test - îles du Vent 
     try {
       const res = await fetch(GEOJSON_URL);
       if (!res.ok) throw new Error("Failed to load GeoJSON");
