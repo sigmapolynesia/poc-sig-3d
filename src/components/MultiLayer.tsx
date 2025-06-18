@@ -1,9 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { Protocol } from 'pmtiles';
 import MapContainer from './MapContainer';
 import { useWMTS } from '../hooks/useWMTS';
-import { DEM_URL, GEOJSON_URL, MVT_URL, WMTS_URL } from './config-ml';
+import { DEM_URL, GEOJSON_URL, MVT_URL, PMTILES_URL, WMTS_URL } from './config-ml';
 import { configureMapLibreWMTS, configureMapLibreGeoJSON  } from '../utils/maplibre-utils';
 import { generateTMSTileUrl } from '../types/tms-parse.ts'
 
@@ -29,6 +30,9 @@ const MultiLayer: React.FC<LayerProps> = ({
 
   useEffect(() => {
   if (!mapContainer.current || mapRef.current) return;
+
+  let protocol = new Protocol();
+  maplibregl.addProtocol("pmtiles", protocol.tile);
 
   const map = new maplibregl.Map({
     container: mapContainer.current,
@@ -96,15 +100,15 @@ const MultiLayer: React.FC<LayerProps> = ({
     }
 
     // 3. Extrusion de bâtiments via Tileserver-GL - format -> PMTiles
-    map.addSource('openmaptiles', {
+    map.addSource('protomaps', {
       type: 'vector',
-      url: 'http://localhost:8080/data/v3.json', 
+      url: PMTILES_URL, 
     });
 
     map.addLayer({
       id: 'buildings-fill',
       type: 'fill-extrusion',
-      source: 'openmaptiles',
+      source: 'protomaps',
       'source-layer': 'building',
       minzoom: 15,
       paint: {
