@@ -4,7 +4,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { Protocol } from 'pmtiles';
 import MapContainer from './MapContainer';
 import { useWMTS } from '../hooks/useWMTS';
-import { DEM_URL, GEOJSON_URL, MVT_URL, PMTILES_URL, WMTS_URL } from './config-ml';
+import { DEM_URL, GEOJSON_URL, MVT_URL, EXTRUSION_URL, WMTS_URL } from './config-ml';
 import { configureMapLibreWMTS, configureMapLibreGeoJSON  } from '../utils/maplibre-utils';
 import { generateTMSTileUrl } from '../types/tms-parse.ts'
 
@@ -51,11 +51,12 @@ const MultiLayer: React.FC<LayerProps> = ({
       sky: {
             "sky-color": "#87CEEB",        
             "horizon-color": "#B0E0E6",     
-            "sky-horizon-blend": 1,      
-          } },
+            "sky-horizon-blend": 0.1,      
+        }, 
+      },
       center,
       zoom,
-      maxPitch: 82,
+      maxPitch: 75,
   });
 
   mapRef.current = map;
@@ -105,7 +106,7 @@ const MultiLayer: React.FC<LayerProps> = ({
     // 3. Extrusion de bâtiments via Tileserver-GL - format -> PMTiles
     map.addSource('protomaps', {
       type: 'vector',
-      url: PMTILES_URL, 
+      url: EXTRUSION_URL, 
     });
 
     map.addLayer({
