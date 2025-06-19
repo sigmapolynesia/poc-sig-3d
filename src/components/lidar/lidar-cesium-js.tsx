@@ -8,16 +8,16 @@ const LidarCesiumJS = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (mapContainer.current) {
-      const container = mapContainer.current;
+    const container = mapContainer.current;
+    if (container) {
       container.innerHTML = '<div class="map-placeholder">Carte CesiumJS</div>';
       container.className = 'map-container cesium';
     }
 
     return () => {
       // Nettoyage
-      if (mapContainer.current) {
-        mapContainer.current.innerHTML = '';
+      if (container) {
+        container.innerHTML = '';
       }
     };
   }, []);

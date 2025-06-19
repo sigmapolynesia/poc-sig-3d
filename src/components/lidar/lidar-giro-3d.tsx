@@ -25,7 +25,7 @@ const NUKUHIVA_LON = -140.168868;
 const NUKUHIVA_LAT = -8.863563;
 
 
-function placeCameraOnTop(volume: any, instance: Instance): void {
+function placeCameraOnTop(volume: import('three').Box3, instance: Instance): void {
   if (!instance) {
     return;
   }
@@ -83,7 +83,7 @@ const LidarGiro3D = ({
       -20037508.34, 20037508.34, -20037508.34, 20037508.34
     );
 
-    let instance = new Instance({
+    const instance = new Instance({
       target: mapContainer.current,
       crs: extent.crs,
       backgroundColor: 0x0a3b59,
@@ -97,7 +97,7 @@ const LidarGiro3D = ({
     const map = new Map({ extent });
     instance.add(map);
 
-    let controls = new MapControls(instance.view.camera, instance.domElement);
+    const controls = new MapControls(instance.view.camera, instance.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
     controls.screenSpacePanning = true;
@@ -137,7 +137,10 @@ const LidarGiro3D = ({
         await instance.add(entity);
         entity.setActiveAttribute('Color');
         
-        placeCameraOnTop(entity.getBoundingBox(), instance);
+        const boundingBox = entity.getBoundingBox();
+        if (boundingBox) {
+          placeCameraOnTop(boundingBox, instance);
+        }
       } catch (error) {
         console.error('Erreur lors du chargement du nuage de points:', error);
       }
