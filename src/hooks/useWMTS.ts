@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { WMTSLayer } from '../types/wmts';
 import { fetchWMTSCapabilities } from '../types/wmts-parse';
 
@@ -25,6 +25,15 @@ export const useWMTS = (
   const [currentLayer, setCurrentLayer] = useState<string>(initialLayer);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
+  
+  // Référence stable pour le layerFilter
+  const layerFilterRef = useRef(layerFilter);
+  layerFilterRef.current = layerFilter;
+
+  // Mémoriser la fonction de filtrage pour éviter les re-renders inutiles
+  const stableLayerFilter = useCallback((layers: WMTSLayer[]) => {
+    return layerFilterRef.current ? layerFilterRef.current(layers) : layers;
+  }, []);
 
   useEffect(() => {
     const loadCapabilities = async () => {
@@ -32,12 +41,14 @@ export const useWMTS = (
         setIsLoading(true);
         const parsedLayers = await fetchWMTSCapabilities(url);
         
-        const processedLayers = layerFilter ? layerFilter(parsedLayers) : parsedLayers;
+        const processedLayers = stableLayerFilter(parsedLayers);
         
         setLayers(processedLayers);
         
-        if (processedLayers.length > 0 && !processedLayers.some(l => l.identifier === currentLayer)) {
+        if (processedLayers.length > 0 && !processedLayers.some(l => l.identifier === initialLayer)) {
           setCurrentLayer(processedLayers[0].identifier);
+        } else if (processedLayers.length > 0) {
+          setCurrentLayer(initialLayer);
         }
         
         setError(null);
@@ -50,7 +61,7 @@ export const useWMTS = (
     };
 
     loadCapabilities();
-  }, [url, initialLayer]);
+  }, [url, initialLayer, stableLayerFilter]); 
 
   return {
     layers,

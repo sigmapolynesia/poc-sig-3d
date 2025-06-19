@@ -58,11 +58,9 @@ const WMTSMapGL: React.FC<WMTSMapGLProps> = ({
       zoom
     });
 
-    // Attendre que la carte soit complètement chargée
     map.current.on('load', () => {
       isMapReady.current = true;
       
-      // Charger la couche initiale une fois la carte prête
       if (layers.length > 0) {
         const layer = layers.find(l => l.identifier === currentLayer);
         if (layer) {
@@ -99,7 +97,7 @@ const WMTSMapGL: React.FC<WMTSMapGLProps> = ({
     
     configureMapLibreWMTS(map.current, layer, WMTS_URL);
     maplibreCenter(map.current, zoom);
-  }, [currentLayer, layers, zoom]); // Se déclenche quand les layers sont chargés
+  }, [currentLayer, layers, zoom]); 
 
   const reloadCurrentLayer = () => {
     if (!map.current || !isMapReady.current || layers.length === 0) return;
