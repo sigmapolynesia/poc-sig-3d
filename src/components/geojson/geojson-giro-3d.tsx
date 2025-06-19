@@ -28,7 +28,7 @@ const GeojsonGiro3D: React.FC = () => {
       -20037508.34, 20037508.34, -20037508.34, 20037508.34
     );
 
-    let instance = new Instance({
+    const instance = new Instance({
       target: mapContainer.current,
       crs: extent.crs,
       backgroundColor: 0x0a3b59,
@@ -42,7 +42,7 @@ const GeojsonGiro3D: React.FC = () => {
     const map = new Map({ extent });
     instance.add(map);
 
-    let controls = new MapControls(instance.view.camera, instance.domElement);
+    const controls = new MapControls(instance.view.camera, instance.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
     controls.screenSpacePanning = true;

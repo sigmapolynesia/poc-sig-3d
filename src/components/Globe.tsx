@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import Map, { NavigationControl, MapRef } from 'react-map-gl/maplibre';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import type { ViewStateChangeEvent } from 'react-map-gl/maplibre';
 
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY;
 
@@ -69,7 +70,7 @@ const Globe: React.FC<GlobeProps> = ({
       if (!map.getLayer('hillshading')) {
         try {
           const availableLayers = map.getStyle().layers.map(layer => layer.id);
-          let beforeLayerId = availableLayers.find(id => id.includes('label') || id.includes('place'));
+          const beforeLayerId = availableLayers.find(id => id.includes('label') || id.includes('place'));
           
           map.addLayer({
             id: 'hillshading',
@@ -83,7 +84,7 @@ const Globe: React.FC<GlobeProps> = ({
               visibility: 'none'
             }
           }, beforeLayerId || undefined);
-        } catch (error) {
+        } catch {
           map.addLayer({
             id: 'hillshading',
             source: 'terrain-hillshade',
@@ -115,7 +116,7 @@ const Globe: React.FC<GlobeProps> = ({
     }
   }, [mapIsLoaded, exaggeration, terrainEnabled, viewState.zoom]);
 
-  const handleViewStateChange = (evt: any) => {
+  const handleViewStateChange = (evt: ViewStateChangeEvent) => {
     const newViewState = evt.viewState;
     setViewState(newViewState);
     
