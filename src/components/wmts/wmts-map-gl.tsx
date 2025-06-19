@@ -19,6 +19,7 @@ const WMTSMapGL: React.FC<WMTSMapGLProps> = ({
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
+  const isMapReady = useRef(false);
   
   const WMTS_URL = 'https://www.tefenua.gov.pf/api/wmts';
   
@@ -31,9 +32,13 @@ const WMTSMapGL: React.FC<WMTSMapGLProps> = ({
     WMTS_URL, 
     selectedLayer,
     (layers) => {
-      const filteredLayers = layers.filter(layer => layer.title === "Fond Léger" || layer.title === "FOND Tefenua" );
+      const filteredLayers = layers.filter(layer => 
+        layer.title === "Fond Léger" || layer.title === "FOND Tefenua"
+      );
 
-      filteredLayers.forEach(layer => { layer.title = layer.title === "FOND Tefenua" ? "Fond Tefenua" : layer.title; });
+      filteredLayers.forEach(layer => { 
+        layer.title = layer.title === "FOND Tefenua" ? "Fond Tefenua" : layer.title; 
+      });
 
       return filteredLayers.sort((a) => {
         if (a.title === "Fond Tefenua") return -1;
@@ -53,27 +58,51 @@ const WMTSMapGL: React.FC<WMTSMapGLProps> = ({
       zoom
     });
 
+    // Attendre que la carte soit complètement chargée
+    map.current.on('load', () => {
+      isMapReady.current = true;
+      
+      // Charger la couche initiale une fois la carte prête
+      if (layers.length > 0) {
+        const layer = layers.find(l => l.identifier === currentLayer);
+        if (layer) {
+          configureMapLibreWMTS(map.current!, layer, WMTS_URL);
+          maplibreCenter(map.current!, zoom);
+        }
+      }
+    });
+
     return () => {
+      isMapReady.current = false;
       map.current?.remove();
       map.current = null;
     };
-  }, []);
+  }, [center, currentLayer, layers, zoom]);
 
   // 2. Chargement et mise à jour de la couche WMTS
   useEffect(() => {
-    if (!map.current || !map.current.loaded() || layers.length === 0) return;
+    if (!map.current || !isMapReady.current || layers.length === 0) return;
     
     const layer = layers.find(l => l.identifier === currentLayer);
     if (!layer) return;
     
     configureMapLibreWMTS(map.current, layer, WMTS_URL);
-    
-    // 3. Zoom sur la vue par défaut
     maplibreCenter(map.current, zoom);
-  }, [currentLayer, layers, map.current?.loaded()]);
+  }, [currentLayer, layers, zoom]);
+
+  // 3. Effet pour charger la couche initiale quand les layers sont disponibles
+  useEffect(() => {
+    if (!map.current || !isMapReady.current || layers.length === 0) return;
+    
+    const layer = layers.find(l => l.identifier === currentLayer);
+    if (!layer) return;
+    
+    configureMapLibreWMTS(map.current, layer, WMTS_URL);
+    maplibreCenter(map.current, zoom);
+  }, [currentLayer, layers, zoom]); // Se déclenche quand les layers sont chargés
 
   const reloadCurrentLayer = () => {
-    if (!map.current || !map.current.loaded() || layers.length === 0) return;
+    if (!map.current || !isMapReady.current || layers.length === 0) return;
     
     const layer = layers.find(l => l.identifier === currentLayer);
     if (!layer) return;
@@ -84,7 +113,13 @@ const WMTSMapGL: React.FC<WMTSMapGLProps> = ({
   return (
     <div>
       <div style={{ marginBottom: '10px' }}>
-        <WMTSLayerSelector layers={layers} currentLayer={currentLayer} onLayerChange={setCurrentLayer} onRefresh={reloadCurrentLayer} loading={isLoading} />
+        <WMTSLayerSelector 
+          layers={layers} 
+          currentLayer={currentLayer} 
+          onLayerChange={setCurrentLayer} 
+          onRefresh={reloadCurrentLayer} 
+          loading={isLoading} 
+        />
       </div>
       <MapContainer ref={mapContainer} />
     </div>

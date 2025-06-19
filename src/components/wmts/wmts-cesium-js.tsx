@@ -20,7 +20,7 @@ const WMTSCesiumJS: React.FC<WMTSCesiumJSProps> = ({
   
   const WMTS_URL = "https://www.tefenua.gov.pf/api/wmts";
   
-  const layers: WMTSLayer[] = [
+  const layers: WMTSLayer[] = React.useMemo(() => [
     { 
       identifier: "TEFENUA:FOND", 
       title: "Fond Tefenua",
@@ -33,7 +33,7 @@ const WMTSCesiumJS: React.FC<WMTSCesiumJSProps> = ({
       format: "image/png8",
       tileMatrixSet: "EPSG:4326"
     },
-  ];
+  ], []);
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -63,7 +63,7 @@ const WMTSCesiumJS: React.FC<WMTSCesiumJSProps> = ({
         viewer.current = null;
       }
     };
-  }, []);
+  }, [currentLayer, layers]);
 
   useEffect(() => {
     if (!viewer.current) return;
@@ -80,7 +80,7 @@ const WMTSCesiumJS: React.FC<WMTSCesiumJSProps> = ({
         setIsLoading(false);
       }
     }
-  }, [currentLayer]);
+  }, [currentLayer, layers]);
 
   const reloadCurrentLayer = () => {
     if (!viewer.current) return;
