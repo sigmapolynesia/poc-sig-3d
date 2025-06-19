@@ -79,7 +79,7 @@ const ReliefMapGL: React.FC<DEMMapGLProps> = ({
           mapInstance.current = null;
         }
       };
-    }, []);
+    }, [apiKey, center, zoom]);
   
     useEffect(() => {
       if (mapInstance.current) {
