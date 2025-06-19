@@ -57,7 +57,7 @@ const MVTCesium: React.FC<MVTCesiumProps> = ({
             lineWidth: 1
           };
         },
-        onSelectFeature: (feature: any) => {
+        onSelectFeature: (feature: unknown) => {
           console.log('Feature sélectionnée:', feature);
         },
         credit: 'GeoServer PAEA:PGA',
@@ -91,7 +91,7 @@ const MVTCesium: React.FC<MVTCesiumProps> = ({
         viewerRef.current = null;
       }
     };
-  }, []);
+  }, [center, zoom]);
 
   return (
     <MapContainer ref={mapContainer} style={{ marginTop: '20px', height: '100%', width: '100%' }} />

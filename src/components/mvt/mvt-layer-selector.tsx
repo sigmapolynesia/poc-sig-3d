@@ -9,7 +9,7 @@ export interface LayerInfo {
 }
 
 export interface AttributeValue {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface LayerValues {
@@ -17,7 +17,7 @@ export interface LayerValues {
 }
 
 export interface ValueCount {
-  value: any;
+  value: unknown;
   count: number;
   points: number;
   linestrings: number;
@@ -32,8 +32,8 @@ interface MVTLayerSelectorProps {
   focusedAttribute?: string;
   focusedLayer?: string;
   valueCounts: ValueCount[];
-  onValueHover: (value: any) => void;
-  focusedValue?: any;
+  onValueHover: (value: unknown) => void;
+  focusedValue?: unknown;
   showTileBoundaries?: boolean;
   onToggleTileBoundaries?: (show: boolean) => void;
 }

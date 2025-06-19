@@ -86,7 +86,7 @@ const MVTMapGL: React.FC<MVTMapGLProps> = ({
         mapInstance.current = null;
       }
     };
-  }, []);
+  }, [center, zoom]);
 
   useEffect(() => {
     if (mapInstance.current) {
