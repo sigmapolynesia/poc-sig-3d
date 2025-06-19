@@ -92,8 +92,8 @@ const ReliefGiro3D: React.FC = () => {
             url: TILE_URL,
             projection: 'EPSG:3857',
             crossOrigin: "anonymous",
-            minZoom: 6,  
-            maxZoom: 18, 
+            minZoom: 0,  
+            maxZoom: 12, 
             tileSize: 256, 
           }),
         });
