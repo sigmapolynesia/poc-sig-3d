@@ -9,13 +9,13 @@ import { Title } from '@mantine/core';
 
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY;
 
-interface GLTFMapGLProps {
+interface GLBMapGLProps {
   center?: [number, number];
   zoom?: number;
   apiKey?: string;
 }
 
-const GLTFMapGL: React.FC<GLTFMapGLProps> = ({
+const GLTFMapGL: React.FC<GLBMapGLProps> = ({
   center = [-140.168868, -8.863563],
   zoom = 15,
   apiKey = MAPTILER_KEY
@@ -56,32 +56,39 @@ const GLTFMapGL: React.FC<GLTFMapGLProps> = ({
       scale: modelAsMercatorCoordinate.meterInMercatorCoordinateUnits(),
     };
 
+    interface ThreeLayerContext {
+      scene: THREE.Scene;
+      camera: THREE.Camera;
+      renderer: THREE.WebGLRenderer;
+      canvas: HTMLCanvasElement;
+    }
+    
     const customLayer: CustomLayerInterface = {
       id: '3d-model',
       type: 'custom',
       renderingMode: '3d',
-      onAdd(map, _gl) {
+      onAdd(map) {
         const scene = new THREE.Scene();
         const camera = new THREE.Camera();
-
+    
         const light1 = new THREE.DirectionalLight(0xffffff, 4);
         light1.position.set(180, 180, 100).normalize();
         scene.add(light1);
-
+    
         const loader = new GLTFLoader();
         loader.load(GLTF_URL, (gltf) => {
           scene.add(gltf.scene);
         });
-
+    
         const renderer = new THREE.WebGLRenderer({
           antialias: true,
           alpha: true,
         });
-
+    
         renderer.setSize(map.getCanvas().width, map.getCanvas().height);
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.autoClear = false;
-
+    
         const canvas = renderer.domElement;
         canvas.style.position = 'absolute';
         canvas.style.top = '0';
@@ -89,20 +96,21 @@ const GLTFMapGL: React.FC<GLTFMapGLProps> = ({
         canvas.style.width = '100%';
         canvas.style.height = '100%';
         canvas.style.pointerEvents = 'none';
-
+    
         map.getContainer().appendChild(canvas);
-
+    
         map.on('resize', () => {
           renderer.setSize(map.getCanvas().width, map.getCanvas().height);
         });
-
-        (this as any).scene = scene;
-        (this as any).camera = camera;
-        (this as any).renderer = renderer;
-        (this as any).canvas = canvas;
+    
+        const ctx = this as unknown as ThreeLayerContext;
+        ctx.scene = scene;
+        ctx.camera = camera;
+        ctx.renderer = renderer;
+        ctx.canvas = canvas;
       },
 
-      render(_gl, matrix) {
+      render(this: ThreeLayerContext, _gl: WebGLRenderingContext, matrix: unknown) {
         const rotationX = new THREE.Matrix4().makeRotationAxis(
           new THREE.Vector3(1, 0, 0),
           modelTransform.rotateX
@@ -116,7 +124,9 @@ const GLTFMapGL: React.FC<GLTFMapGLProps> = ({
           modelTransform.rotateZ
         );
 
-        const m = new THREE.Matrix4().fromArray(matrix.defaultProjectionData.mainMatrix);
+        const m = new THREE.Matrix4().fromArray(
+          (matrix as { defaultProjectionData: { mainMatrix: number[] } }).defaultProjectionData.mainMatrix
+        );
         const l = new THREE.Matrix4()
           .makeTranslation(
             modelTransform.translateX,
@@ -134,9 +144,9 @@ const GLTFMapGL: React.FC<GLTFMapGLProps> = ({
           .multiply(rotationY)
           .multiply(rotationZ);
 
-        const camera = (this as any).camera;
-        const renderer = (this as any).renderer;
-        const scene = (this as any).scene;
+        const camera = this.camera;
+        const renderer = this.renderer;
+        const scene = this.scene;
 
         camera.projectionMatrix = m.multiply(l);
 
@@ -146,10 +156,10 @@ const GLTFMapGL: React.FC<GLTFMapGLProps> = ({
         map.triggerRepaint();
       },
 
-      onRemove(_map, _gl) {
-        const renderer = (this as any).renderer;
-        const canvas = (this as any).canvas;
-        const scene = (this as any).scene;
+      onRemove(this: ThreeLayerContext) {
+        const renderer = this.renderer;
+        const canvas = this.canvas;
+        const scene = this.scene;
 
         if (renderer) {
           renderer.dispose();
@@ -175,7 +185,7 @@ const GLTFMapGL: React.FC<GLTFMapGLProps> = ({
         mapRef.current = null;
       }
     };
-  }, []);
+  }, [apiKey, center, zoom]);
 
   return(
     <div>

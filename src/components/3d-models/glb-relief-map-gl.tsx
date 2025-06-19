@@ -101,7 +101,7 @@ const GLBRMapGL = () => {
         camera?: THREE.Camera;
         renderer?: THREE.WebGLRenderer;
         onAdd(map: Map, gl: WebGLRenderingContext): void;
-        render(_gl: WebGLRenderingContext, matrix: any): void;
+        render(_gl: WebGLRenderingContext, matrix: unknown): void;
       };
 
       const customLayer: CustomLayerWithThree = {
@@ -144,7 +144,7 @@ const GLBRMapGL = () => {
           (this as CustomLayerWithThree).renderer = renderer;
         },
 
-        render(_gl: WebGLRenderingContext, matrix: any) {
+        render(_gl: WebGLRenderingContext, matrix: unknown) {
           const map = mapRef.current!;
           const offsetElevation = map.queryTerrainElevation(sceneOrigin) || 0;
           const originMercator = MercatorCoordinate.fromLngLat(sceneOrigin, offsetElevation);
@@ -156,7 +156,9 @@ const GLBRMapGL = () => {
             scale: originMercator.meterInMercatorCoordinateUnits(),
           };
 
-          const projMatrix = new THREE.Matrix4().fromArray(matrix.defaultProjectionData.mainMatrix);
+          const projMatrix = new THREE.Matrix4().fromArray(
+            (matrix as { defaultProjectionData: { mainMatrix: number[] } }).defaultProjectionData.mainMatrix
+          );
           const transMatrix = new THREE.Matrix4()
             .makeTranslation(transform.translateX, transform.translateY, transform.translateZ)
             .scale(new THREE.Vector3(transform.scale, -transform.scale, transform.scale));

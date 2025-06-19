@@ -20,8 +20,8 @@ type ViewType = 'multi-layer' | 'globe' | 'wmts' | 'relief' | 'geojson' | 'mvt' 
 interface NavItem {
   id: ViewType;
   label: string;
-  component: React.ComponentType<any>;
-  props?: Record<string, any>;
+  component: React.ComponentType<Record<string, unknown>>;
+  props?: Record<string, unknown>;
 }
 
 function App() {

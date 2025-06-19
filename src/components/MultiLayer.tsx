@@ -31,7 +31,7 @@ const MultiLayer: React.FC<LayerProps> = ({
   useEffect(() => {
   if (!mapContainer.current || mapRef.current) return;
 
-  let protocol = new Protocol();
+  const protocol = new Protocol();
   maplibregl.addProtocol("pmtiles", protocol.tile);
 
   const map = new maplibregl.Map({

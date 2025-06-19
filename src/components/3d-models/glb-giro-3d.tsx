@@ -190,7 +190,7 @@ const GLBGiro3D: React.FC<GLBGiro3DProps> = ({
         instanceRef.current = null;
       }
     };
-  }, [modelUrl]);
+  }, [modelPosition, modelRotation, modelScale, modelUrl]);
 
   return(
     <div>

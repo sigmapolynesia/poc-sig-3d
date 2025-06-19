@@ -190,7 +190,7 @@ const GLTFGiro3D: React.FC<GLTFGiro3DProps> = ({
         instanceRef.current = null;
       }
     };
-  }, [modelUrl]);
+  }, [modelPosition, modelRotation, modelScale, modelUrl]);
 
   return(
     <div>
