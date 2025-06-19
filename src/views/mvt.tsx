@@ -7,7 +7,6 @@ import { Tabs, Title, Text } from '@mantine/core';
 import MapLibreLogo from '../assets/maplibre.png';
 import Giro3DLogo from '../assets/giro3d.png';
 import CesiumLogo from '../assets/cesium.png';
-import Test from '../components/mvt/tester';
 
 const MVTView = () => {
   const [activeTab, setActiveTab] = useState('maplibre');
@@ -28,9 +27,6 @@ const MVTView = () => {
           <Tabs.Tab value="cesium">
             <img src={CesiumLogo} alt="Cesium" style={{ height: '20px' }} />
           </Tabs.Tab>
-          <Tabs.Tab value="test">
-            Tester
-          </Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="maplibre">
@@ -45,9 +41,6 @@ const MVTView = () => {
           <MVTCesiumJS />
         </Tabs.Panel>
 
-        <Tabs.Panel value="test">
-          <Test />
-        </Tabs.Panel>
       </Tabs>
     </div>
   );
