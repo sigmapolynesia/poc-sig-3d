@@ -20,6 +20,7 @@ const LidarDeckGL = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const [viewState, updateViewState] = useState<OrbitViewState>(INITIAL_VIEW_STATE);
 
+ // eslint-disable-next-line @typescript-eslint/no-explicit-any
  const onDataLoad = useCallback((data: any) => {
     console.log('Loaded data:', data); 
     

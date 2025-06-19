@@ -18,10 +18,9 @@ const Proj = () => {
     if (!inputX || !inputY) return;
 
     try {
-      let sourceProj, targetProj, x, y;
-      
-      x = parseFloat(inputX);
-      y = parseFloat(inputY);
+      let sourceProj, targetProj;
+      const x = parseFloat(inputX);
+      const y = parseFloat(inputY);
       
       if (isWebMercatorToLonLat) {
         sourceProj = 'EPSG:3857';
