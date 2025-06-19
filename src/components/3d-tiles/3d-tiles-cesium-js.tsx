@@ -40,7 +40,7 @@ const DtilesCesiumJS = () => {
               viewer.current.zoomTo(tileset);
             }
 
-            tileset.tileFailed.addEventListener((error: any) => {
+            tileset.tileFailed.addEventListener((error: unknown) => {
               console.error('Erreur lors du chargement d\'une tuile:', error);
             });
 
