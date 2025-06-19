@@ -135,8 +135,8 @@ export const configureGiro3dGeoJSON = async (
   }
 
 export const centerViewOnLocation = (
-  instance: any,
-  controls: any,
+  instance: { view: { camera: { position: { set: (x: number, y: number, z: number) => void } } } },
+  controls: { target: { set: (x: number, y: number, z: number) => void }, update: () => void },
   lon: number,
   lat: number,
   zoom: number = 2,
