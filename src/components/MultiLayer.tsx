@@ -103,7 +103,7 @@ const MultiLayer: React.FC<LayerProps> = ({
       configureMapLibreWMTS(map, wmtsLayer, WMTS_URL);
     }
 
-    // 3. Extrusion de bâtiments via Tileserver-GL - format -> PMTiles
+    // 3. Extrusion de bâtiments via le format PMTiles
     map.addSource('protomaps', {
       type: 'vector',
       url: EXTRUSION_URL, 
@@ -129,7 +129,7 @@ const MultiLayer: React.FC<LayerProps> = ({
           ['get', 'min_height'],
           0
         ],
-        'fill-extrusion-opacity': 0.8
+        'fill-extrusion-opacity': 0.7
       }
     });
 
