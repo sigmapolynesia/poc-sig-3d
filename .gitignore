@@ -29,13 +29,9 @@ dist-ssr
 .env.test.local
 .env.production.local
 
-public/assets/nkh_tiles
-public/assets/tiles
-public/assets/marq_tiles
-public/assets/nkh_mb_tiles
-public/assets/output
-public/assets/moorea
-public/assets/tahiti
-public/assets/bathy
 public/assets/dem-pf
 public/assets/dem-pf.pmtiles
+public/assets/test.pmtiles
+public/assets/test.mbtiles
+public/assets/testw
+public/assets/testwithout
