@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import MapContainer from '../MapContainer'
-import { configureMapLibreGeoJSON } from '../../utils/maplibre-utils'
 import { GEOJSON_URL } from './config.ts'
 
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY;
@@ -30,12 +29,51 @@ const GeojsonMapGL: React.FC<GeojsonMapGLProps> = ({
         center: center,
         zoom: zoom
       });
-      
+
+      map.current.addControl(new maplibregl.NavigationControl());
+
+      // Wait for the style to load before adding source and layer
       map.current.on('load', () => {
-        
-        if (map.current && !loader.current) {
-          map.current.addControl(new maplibregl.NavigationControl());
-          loadGeoJSON();
+        if (map.current) {
+          map.current.addSource('default-geojson', {
+            type: 'geojson',
+            data: GEOJSON_URL
+          });
+
+          map.current.addLayer({
+            id: 'default-geojson-1',
+            type: 'fill',
+            source: 'default-geojson',
+            paint: {
+              'fill-color': '#0080ff',
+              'fill-opacity': 0.5
+            },
+            filter: ['==', '$type', 'Polygon']
+          });
+
+          map.current.addLayer({
+            id: 'default-geojson-2',
+            type: 'line',
+            source: 'default-geojson',
+            paint: {
+              'line-color': '#0080ff',
+              'line-opacity': 0.5
+            },
+            filter: ['==', '$type', 'LineString']
+          });
+
+          map.current.addLayer({
+            id: 'default-geojson-3',
+            type: 'circle',
+            source: 'default-geojson',
+            paint: {
+              'circle-radius': 5,
+              'circle-color': '#ff7800',
+              'circle-stroke-width': 2,
+              'circle-stroke-color': '#ffffff'
+            },
+            filter: ['==', '$type', 'Point']
+          });
         }
       });
     }
@@ -55,24 +93,6 @@ const GeojsonMapGL: React.FC<GeojsonMapGLProps> = ({
       map.current.setZoom(zoom);
     }
   }, [center, zoom]);
-
-  const loadGeoJSON = () => {
-    if (!map.current || loader.current) return;
-    
-    fetch(GEOJSON_URL)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`Failed to fetch GeoJSON: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        if (map.current) {
-          configureMapLibreGeoJSON(map.current, 'default-geojson', data);
-          loader.current = true;
-        }
-      })
-};
 
   return <MapContainer ref={mapContainer} style={{ width: '100%', height: '100%', marginTop: '20px' }} />;
 };

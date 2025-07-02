@@ -27,10 +27,10 @@ app.register(fastifyStatic, {
   index: false
 })
 
-// Démarre l'application sur le port 3000.
+// Démarre l'application sur le port 3002.
 app.listen({
   host: '0.0.0.0',
-  port: 3000
+  port: 3002
 }).then((result) => {
   console.log(result)
 })
