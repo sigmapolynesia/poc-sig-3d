@@ -3,6 +3,7 @@ import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import MapContainer from '../MapContainer'
 import { GEOJSON_URL } from './config.ts'
+import * as VectorTextProtocol from 'maplibre-gl-vector-text-protocol'
 
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY;
 
@@ -32,6 +33,8 @@ const GeojsonMapGL: React.FC<GeojsonMapGLProps> = ({
 
       map.current.addControl(new maplibregl.NavigationControl());
 
+      VectorTextProtocol.addProtocols(maplibregl);
+      
       // Wait for the style to load before adding source and layer
       map.current.on('load', () => {
         if (map.current) {
@@ -57,7 +60,7 @@ const GeojsonMapGL: React.FC<GeojsonMapGLProps> = ({
             source: 'default-geojson',
             paint: {
               'line-color': '#0080ff',
-              'line-opacity': 0.5
+              'line-opacity': 1
             },
             filter: ['==', '$type', 'LineString']
           });

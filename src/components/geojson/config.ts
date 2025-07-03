@@ -1,1 +1,1 @@
-export const GEOJSON_URL = 'http://localhost:3002/assets/test.geojson'
+export const GEOJSON_URL = `gpx://http://localhost:3002/assets/test.gpx`

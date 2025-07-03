@@ -40,6 +40,7 @@
     "deck.gl": "^9.1.12",
     "fastify": "^5.3.2",
     "maplibre-gl": "^5.4.0",
+    "maplibre-gl-vector-text-protocol": "^0.0.5",
     "math.gl": "^4.1.0",
     "ol": "^9.2.4",
     "ol-mapbox-style": "^12.6.0",
